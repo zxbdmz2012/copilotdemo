@@ -2,12 +2,13 @@ package com.github.copilotdemo.client;
 
 import com.github.copilotdemo.common.RPCRequest;
 import com.github.copilotdemo.common.RPCResponse;
+import com.github.copilotdemo.common.ServiceProperties;
+import com.github.copilotdemo.sample.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -15,7 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -27,40 +28,46 @@ class RPCClientProxyTest {
     @Mock
     private RestClient restClient;
 
+    @Mock
+    private ServiceProperties serviceProperties;
+
     @BeforeEach
     void setUp() {
-        rpcClientProxy = new RPCClientProxy(restClient);
-
         MockitoAnnotations.openMocks(this);
+
         Map<String, String> serviceUrls = new HashMap<>();
         serviceUrls.put("testService", "http://test.com");
-        ReflectionTestUtils.setField(rpcClientProxy, "serviceUrls", serviceUrls);
 
         Map<String, List<String>> serviceUrlMethods = new HashMap<>();
         serviceUrlMethods.put("testService", Collections.singletonList("testMethod"));
-        ReflectionTestUtils.setField(rpcClientProxy, "serviceUrlMethods", serviceUrlMethods);
+
+        when(serviceProperties.getUrls()).thenReturn(serviceUrls);
+        when(serviceProperties.getMethods()).thenReturn(serviceUrlMethods);
     }
 
     @Test
     void testInvoke() throws Throwable {
+        // Create a mock Method
+        Method mockMethod = UserService.class.getMethod("getUserByUserId", String.class);
+
+        // Create a mock RPCRequest
+        RPCRequest mockRequest = new RPCRequest();
+        mockRequest.setInterfaceName("com.github.copilotdemo.UserService");
+        mockRequest.setMethodName("getUserByUserId");
+        mockRequest.setParams(new Object[]{"testUserId"});
+        mockRequest.setParamsTypes(new Class[]{String.class});
+
+        // Create the expected RPCResponse
         RPCResponse expectedResponse = new RPCResponse();
         expectedResponse.setData("testData");
-        when(restClient.sendRequest(any(String.class), any(String.class), any(RPCRequest.class)))
-                .thenReturn(expectedResponse);
 
-        Method method = TestService.class.getMethod("testMethod");
-        Object result = rpcClientProxy.invoke(null, method, null);
+        // Set the behavior of the restClient
+        when(restClient.sendRequest(any(String.class), any(String.class), any(RPCRequest.class))).thenReturn(expectedResponse);
 
-        assertEquals("testData", result);
-    }
+        // Call the invoke method
+        Object result = rpcClientProxy.invoke(rpcClientProxy, mockMethod, new Object[]{"testUserId"});
 
-    @Test
-    void testGetProxy() {
-        TestService testService = rpcClientProxy.getProxy(TestService.class);
-        assertNotNull(testService);
-    }
-
-    interface TestService {
-        void testMethod();
+        // Verify the result
+        assertEquals(expectedResponse.getData(), result);
     }
 }

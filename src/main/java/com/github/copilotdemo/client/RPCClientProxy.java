@@ -2,6 +2,7 @@ package com.github.copilotdemo.client;
 
 import com.github.copilotdemo.common.RPCRequest;
 import com.github.copilotdemo.common.RPCResponse;
+import com.github.copilotdemo.common.ServiceProperties;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
@@ -17,12 +18,13 @@ import java.util.Map;
 public class RPCClientProxy implements InvocationHandler {
 
 
-    // Add a RestClient instance field
-    private RestClient restClient;
 
-    // Add a constructor to set the RestClient
-    public RPCClientProxy(RestClient restClient) {
+    private RestClient restClient;
+    private ServiceProperties serviceProperties;
+
+    public RPCClientProxy(RestClient restClient, ServiceProperties serviceProperties) {
         this.restClient = restClient;
+        this.serviceProperties = serviceProperties;
     }
     // These are the methods for each service, loaded from the application configuration
     @Value("#{${serviceMethods}}")
@@ -44,10 +46,9 @@ public class RPCClientProxy implements InvocationHandler {
             url = service.url();
         }
         if(StringUtils.isEmpty(url)){
-            // Check each service's methods to find the correct URL
-            for (Map.Entry<String, List<String>> entry : serviceUrlMethods.entrySet()) {
+            for (Map.Entry<String, List<String>> entry : serviceProperties.getMethods().entrySet()) {
                 if (entry.getValue().contains(method.getName())) {
-                    url = serviceUrls.get(entry.getKey());
+                    url = serviceProperties.getUrls().get(entry.getKey());
                     break;
                 }
             }
