@@ -27,12 +27,7 @@ public class RPCClientProxy implements InvocationHandler {
         this.serviceProperties = serviceProperties;
     }
     // These are the methods for each service, loaded from the application configuration
-    @Value("#{${serviceMethods}}")
-    private Map<String, List<String>> serviceUrlMethods;
 
-    // These are the URLs for each service, loaded from the application configuration
-    @Value("#{${services}}")
-    private Map<String, String> serviceUrls;
 
     // This method is called when a method on the proxy object is invoked
     @Override
@@ -43,7 +38,7 @@ public class RPCClientProxy implements InvocationHandler {
         Service service = method.getAnnotation(Service.class);
         // If the annotation exists, get the url value from the annotation
         if (service != null) {
-            url = service.url();
+            url = serviceProperties.getUrls().get(service.url());
         }
         if(StringUtils.isEmpty(url)){
             for (Map.Entry<String, List<String>> entry : serviceProperties.getMethods().entrySet()) {
@@ -67,10 +62,14 @@ public class RPCClientProxy implements InvocationHandler {
                 .build();
 
         // Send the RPC request and get the response
-        RPCResponse response = restClient.sendRequest(url, "api/common", request);
+        RPCResponse response = restClient.sendRequest(url, "rpc", request);
 
         // Return the data from the response
-        return response.getData();
+        if(response.isSuccess()){
+            return response.getData();
+        }else {
+            throw new RuntimeException("RPC call failed");
+        }
     }
 
     // This method is used to create a proxy instance for a given class.

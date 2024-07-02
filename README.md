@@ -96,10 +96,17 @@ In this example, `IMyService` is an interface that defines the methods of the se
 ```yaml
 
 services:
-  service1: http://localhost:8080/service1
-  service2: http://localhost:8080/service2
-  service3: http://localhost:8080/service3
-  service4: http://localhost:8080/service4
+  urls:
+    service1: http://localhost:8080/service1
+    service2: http://localhost:8081/service2
+  methods:
+    service1:
+      - method1
+      - method2
+    service2:
+      - method3
+      - method4
+
 ```
 In this example, the URL for the service1 method is http://localhost:8080/service1, and the URL for the service2 method is http://localhost:8080/service2.
 ## Conclusion

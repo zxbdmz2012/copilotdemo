@@ -3,6 +3,7 @@ package com.github.copilotdemo.server;
 import com.github.copilotdemo.common.RPCRequest;
 import com.github.copilotdemo.common.RPCResponse;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,13 +17,9 @@ import java.lang.reflect.Method;
 @NoArgsConstructor
 public class RpcController {
 
+    @Autowired
     // A reference to the ServiceProvider, which provides the services that can be called via RPC.
     private  ServiceProvider serviceProvider;
-
-    // Constructor for the RpcController. It takes a ServiceProvider as a parameter.
-    public RpcController(ServiceProvider serviceProvider) {
-        this.serviceProvider = serviceProvider;
-    }
 
     // This method handles POST requests to the /rpc endpoint.
     // It takes an RPCRequest as a parameter, which is automatically deserialized from the request body.
