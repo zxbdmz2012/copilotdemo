@@ -10,13 +10,13 @@ import java.util.logging.Logger;
 // It maintains a map where the keys are the names of the service interfaces and the values are the service instances.
 @Component
 public class ServiceProvider {
-    // A map to store the service instances. The key is the name of the service interface, and the value is the service instance.
-    private Map<String, Object> interfaceProvider;
     // A logger to log warning messages.
     private static final Logger LOGGER = Logger.getLogger(ServiceProvider.class.getName());
+    // A map to store the service instances. The key is the name of the service interface, and the value is the service instance.
+    private Map<String, Object> interfaceProvider;
 
     // Constructor for the ServiceProvider. It initializes the interfaceProvider map.
-    public ServiceProvider(){
+    public ServiceProvider() {
         this.interfaceProvider = new HashMap<>();
     }
 
@@ -30,11 +30,11 @@ public class ServiceProvider {
             LOGGER.warning("The service instance does not implement any interfaces: " + serviceInstance.getClass().getName());
             return;
         }
-        for(Class clazz : interfaces){
-            interfaceProvider.put(clazz.getName(),serviceInstance);
+        for (Class clazz : interfaces) {
+            interfaceProvider.put(clazz.getName(), serviceInstance);
         }
         // Also register the service class itself
-        interfaceProvider.put(serviceClass.getName(),serviceInstance);
+        interfaceProvider.put(serviceClass.getName(), serviceInstance);
     }
 
     // This method adds a service to the interfaceProvider map.
@@ -47,7 +47,7 @@ public class ServiceProvider {
     // This method retrieves a service from the interfaceProvider map.
     // It takes the name of the service interface as a parameter.
     // It returns the service instance if it exists, or null if it doesn't.
-    public Object getService(String interfaceName){
+    public Object getService(String interfaceName) {
         Object service = interfaceProvider.get(interfaceName);
         if (service == null) {
             LOGGER.warning("No service registered for interface: " + interfaceName);

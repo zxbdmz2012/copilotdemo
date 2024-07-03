@@ -19,7 +19,7 @@ public class RpcController {
 
     @Autowired
     // A reference to the ServiceProvider, which provides the services that can be called via RPC.
-    private  ServiceProvider serviceProvider;
+    private ServiceProvider serviceProvider;
 
     // This method handles POST requests to the /rpc endpoint.
     // It takes an RPCRequest as a parameter, which is automatically deserialized from the request body.
@@ -34,7 +34,7 @@ public class RpcController {
     // This method uses reflection to call the requested service method and get the response.
     // It takes an RPCRequest as a parameter, which contains the details of the service method to call.
     // It returns an RPCResponse, which contains the result of the service method call.
-    private RPCResponse getResponse(RPCRequest request){
+    private RPCResponse getResponse(RPCRequest request) {
         // Get the name of the service interface from the request.
         String interfaceName = request.getInterfaceName();
         // Get the service implementation object from the ServiceProvider.

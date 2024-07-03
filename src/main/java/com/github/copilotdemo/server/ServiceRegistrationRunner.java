@@ -1,7 +1,6 @@
 package com.github.copilotdemo.server;
 
 import com.github.copilotdemo.common.RegisterService;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.ListableBeanFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;

@@ -3,7 +3,6 @@ package com.github.copilotdemo.client;
 import com.github.copilotdemo.common.RPCRequest;
 import com.github.copilotdemo.common.RPCResponse;
 import com.github.copilotdemo.common.ServiceProperties;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -16,7 +15,6 @@ import java.util.Map;
 @Component
 // This class is responsible for creating a proxy for the remote service and handling method invocations
 public class RPCClientProxy implements InvocationHandler {
-
 
 
     private RestClient restClient;
@@ -40,7 +38,7 @@ public class RPCClientProxy implements InvocationHandler {
         if (service != null) {
             url = serviceProperties.getUrls().get(service.url());
         }
-        if(StringUtils.isEmpty(url)){
+        if (StringUtils.isEmpty(url)) {
             for (Map.Entry<String, List<String>> entry : serviceProperties.getMethods().entrySet()) {
                 if (entry.getValue().contains(method.getName())) {
                     url = serviceProperties.getUrls().get(entry.getKey());
@@ -54,20 +52,20 @@ public class RPCClientProxy implements InvocationHandler {
             throw new RuntimeException("No url found for method: " + method.getName());
         }
         // Create the RPC request object
-        RPCRequest request = RPCRequest.builder()
-                .interfaceName(method.getDeclaringClass().getName())
-                .methodName(method.getName())
-                .params(args)
-                .paramsTypes(method.getParameterTypes())
-                .build();
+        RPCRequest request = new RPCRequest(
+                method.getDeclaringClass().getName(),
+                method.getName(),
+                args,
+                method.getParameterTypes()
+        );
 
         // Send the RPC request and get the response
         RPCResponse response = restClient.sendRequest(url, "rpc", request);
 
         // Return the data from the response
-        if(response.isSuccess()){
-            return response.getData();
-        }else {
+        if (response.isSuccess()) {
+            return response.getResult();
+        } else {
             throw new RuntimeException("RPC call failed");
         }
     }

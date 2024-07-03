@@ -14,7 +14,7 @@ public class RestClient {
     // sendRequest is a static method that sends a POST request to a specified URL and path.
     // It takes in a URL, a path, and an RPCRequest object as parameters.
     // It returns an RPCResponse object.
-    public  RPCResponse sendRequest(String url, String path, RPCRequest request) {
+    public RPCResponse sendRequest(String url, String path, RPCRequest request) {
         // Create a new RestTemplate object. This object is used to send HTTP requests.
         RestTemplate restTemplate = new RestTemplate();
 

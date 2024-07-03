@@ -1,20 +1,18 @@
 package com.github.copilotdemo.client;
 
-import com.github.copilotdemo.common.RPCRequest;
-import com.github.copilotdemo.common.RPCResponse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import com.github.copilotdemo.common.RPCRequest;
+import com.github.copilotdemo.common.RPCResponse;
 
 class RestClientTest {
 
