@@ -6,11 +6,11 @@ This project is a Java-based application that utilizes the Maven build system. I
 
 ## Server
 
-The server part of the application is responsible for providing services. It contains a `ServiceProvider` class that manages the services provided by the server. The `ServiceProvider` class has methods to add a service, provide a service interface, and retrieve a service implementation for a given interface name.
+The server part of the application is responsible for providing services. It contains a `ServiceProvider` class that manages the services provided by the server. The `ServiceProvider` class has methods to add a targetService, provide a targetService interface, and retrieve a targetService implementation for a given interface name.
 
 ## Client
 
-The client part of the application is responsible for making RPC calls to the server. It contains a `RPCClientProxy` class that acts as a proxy for the client to make RPC calls. The `RPCClientProxy` class has methods to invoke a method on the server and get a proxy for a service.
+The client part of the application is responsible for making RPC calls to the server. It contains a `RPCClientProxy` class that acts as a proxy for the client to make RPC calls. The `RPCClientProxy` class has methods to invoke a method on the server and get a proxy for a targetService.
 
 The client also contains a `RestClient` class that is a utility class for sending HTTP requests to a specified URL. The `RestClient` class has a method to send a request to a specified URL and path.
 
@@ -71,11 +71,11 @@ public class MyService implements IMyService {
 }
 ```
 
-In this example, `MyService` is a service implementation that will be automatically registered when the application starts.
+In this example, `MyService` is a targetService implementation that will be automatically registered when the application starts.
 
 ## Step 3: Add the Server Interfaces on the Client Side
 
-On the client side, you need to add the interfaces of the services that you want to call. The class name, method name, and parameters of the interfaces should be exactly the same as those on the server side.  You also need to add the @Service annotation to the methods of the interfaces. This annotation is used to specify the URL for the RPC call. The URL of the service is read from the application.yaml file.  Here is an example:
+On the client side, you need to add the interfaces of the services that you want to call. The class name, method name, and parameters of the interfaces should be exactly the same as those on the server side.  You also need to add the @Service annotation to the methods of the interfaces. This annotation is used to specify the URL for the RPC call. The URL of the targetService is read from the application.yaml file.  Here is an example:
 ```java
 public interface IMyService {
     @Service(url = "${services.service1}")

@@ -1,2 +1,4 @@
+org.springframework.boot.env.EnvironmentPostProcessor=\
+com.github.copilot.configcenter.client.config.ConfigEnvironmentPostProcessor
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.github.copilotdemo.MyStarterAutoConfiguration
+com.github.copilot.configcenter.client.autoconfigure.ConfigAutoConfiguration
