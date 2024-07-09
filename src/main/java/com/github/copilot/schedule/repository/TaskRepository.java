@@ -28,21 +28,18 @@ import java.util.stream.Collectors;
 @Component
 public class TaskRepository {
     private static final Logger log = LoggerFactory.getLogger(TaskRepository.class);
-    @Resource
-    private NodeJpaRepository nodeJpaRepository;
-
-    @Resource
-    private TaskJpaRepository taskJpaRepository;
-
-    @Resource
-    private TaskDetailJpaRepository taskDetailJpaRepository;
-
-    @Autowired
-    private EasyJobConfig config;
     /**
      * 序列化工具类
      */
     private final ObjectSerializer serializer = new JdkSerializationSerializer<Invocation>();
+    @Resource
+    private NodeJpaRepository nodeJpaRepository;
+    @Resource
+    private TaskJpaRepository taskJpaRepository;
+    @Resource
+    private TaskDetailJpaRepository taskDetailJpaRepository;
+    @Autowired
+    private EasyJobConfig config;
 
     /**
      * 查询还需要指定时间才开始的主任务列表

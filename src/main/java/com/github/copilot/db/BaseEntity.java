@@ -1,4 +1,4 @@
-package com.github.copilot.schedule.entity;
+package com.github.copilot.db;
 
 import lombok.Getter;
 import lombok.Setter;

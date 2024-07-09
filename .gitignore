@@ -71,7 +71,7 @@ buildNumber.properties
 .gradle/
 build/
 
-# Test result report files
+# Test r report files
 TEST-*.xml
 junitreports/
 

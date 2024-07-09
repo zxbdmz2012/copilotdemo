@@ -56,22 +56,16 @@ public class ContextRefreshedListener implements ApplicationListener<ContextRefr
 
     public final static String DOT = ".";
     private static final Logger log = LoggerFactory.getLogger(ContextRefreshedListener.class);
-
-    @Autowired
-    private TaskExecutor taskExecutor;
-
-    @Autowired
-    private TaskRepository taskRepository;
-
-    @Autowired
-    private EasyJobConfig config;
-
-
     /**
      * 用来保存方法名/任务名和任务插入后数据库的ID的映射,用来处理子任务新增用
      */
     private final Map<String, Long> taskIdMap = new HashMap<>();
-
+    @Autowired
+    private TaskExecutor taskExecutor;
+    @Autowired
+    private TaskRepository taskRepository;
+    @Autowired
+    private EasyJobConfig config;
     /**
      * 存放数据库所有的任务名称
      */
@@ -152,7 +146,6 @@ public class ContextRefreshedListener implements ApplicationListener<ContextRefr
         String timezone = sAnn.timezone();
         String rate = sAnn.rate();
         String cycle = sAnn.cycle();
-        String cron = sAnn.cron();
         String finalName = clazz.getName() + DOT + name;
 
         String cronExpression;

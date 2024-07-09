@@ -33,31 +33,24 @@ import java.util.concurrent.*;
 public class TaskExecutor {
 
     private static final Logger logger = LoggerFactory.getLogger(TaskExecutor.class);
-
-    @Autowired
-    private TaskRepository taskRepository;
-
-    @Autowired
-    private NodeRepository nodeRepository;
-
-    @Autowired
-    private EasyJobConfig config;
-
     /**
      * 创建任务到期延时队列
      */
     private final DelayQueue<DelayItem<Task>> taskQueue = new DelayQueue<>();
-
     /**
      * 可以明确知道最多只会运行2个线程，直接使用系统自带工具就可以了
      */
     private final ExecutorService bossPool = Executors.newFixedThreadPool(2);
-
     /**
      * 正在执行的任务的Future
      */
     private final Map<Long, Future> doingFutures = new HashMap<>();
-
+    @Autowired
+    private TaskRepository taskRepository;
+    @Autowired
+    private NodeRepository nodeRepository;
+    @Autowired
+    private EasyJobConfig config;
     /**
      * 声明工作线程池
      */

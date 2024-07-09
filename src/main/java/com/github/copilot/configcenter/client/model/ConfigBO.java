@@ -1,9 +1,7 @@
 package com.github.copilot.configcenter.client.model;
 
-import com.alibaba.fastjson.JSONObject;
 import lombok.Data;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 

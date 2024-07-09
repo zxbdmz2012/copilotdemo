@@ -1,6 +1,6 @@
 package com.github.copilot.configcenter.entity;
 
-import com.github.copilot.schedule.entity.BaseEntity;
+import com.github.copilot.db.BaseEntity;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 

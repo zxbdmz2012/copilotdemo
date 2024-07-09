@@ -30,25 +30,20 @@ import java.util.concurrent.Executors;
 public class RecoverExecutor {
 
     private static final Logger logger = LoggerFactory.getLogger(RecoverExecutor.class);
-
-    @Autowired
-    private EasyJobConfig config;
-
-    @Autowired
-    private TaskRepository taskRepository;
-
-    @Autowired
-    private NodeRepository nodeRepository;
-
     /**
      * 创建节点心跳延时队列
      */
     private final DelayQueue<DelayItem<Node>> heartBeatQueue = new DelayQueue<>();
-
     /**
      * 可以明确知道最多只会运行2个线程，直接使用系统自带工具
      */
     private final ExecutorService bossPool = Executors.newFixedThreadPool(2);
+    @Autowired
+    private EasyJobConfig config;
+    @Autowired
+    private TaskRepository taskRepository;
+    @Autowired
+    private NodeRepository nodeRepository;
 
     @PostConstruct
     public void init() {

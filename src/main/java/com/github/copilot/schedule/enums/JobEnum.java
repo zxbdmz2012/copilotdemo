@@ -12,6 +12,7 @@ public enum JobEnum {
 
     private final String name;
     private final Integer value;
+
     JobEnum(String name, Integer value) {
         this.name = name;
         this.value = value;

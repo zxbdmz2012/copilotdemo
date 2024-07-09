@@ -1,5 +1,6 @@
 package com.github.copilot.schedule.entity;
 
+import com.github.copilot.db.BaseEntity;
 import com.github.copilot.schedule.enums.TaskStatus;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;

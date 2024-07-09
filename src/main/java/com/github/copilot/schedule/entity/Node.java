@@ -1,5 +1,6 @@
 package com.github.copilot.schedule.entity;
 
+import com.github.copilot.db.BaseEntity;
 import com.github.copilot.schedule.enums.NodeStatus;
 import com.github.copilot.schedule.enums.NotifyCmd;
 import lombok.*;
