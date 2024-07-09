@@ -1,10 +1,13 @@
 package com.github.copilot.user.config;
 
+import com.github.copilot.user.annotation.EnableUserInfoArgResolver;
 import com.github.copilot.user.feign.UserQueryInterface;
 import com.github.copilot.user.interceptor.ContextHandlerInterceptor;
 import com.github.copilot.user.resolver.ContextArgumentResolver;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -19,20 +22,31 @@ import java.util.List;
 @Component
 public class LoginArgResolverConfig implements WebMvcConfigurer {
 
+    @Autowired
+    private ApplicationContext applicationContext;
     @Lazy
     @Autowired
     private UserQueryInterface userQueryInterface;
 
-    /**
-     * Token参数解析
-     *
-     * @param argumentResolvers 解析类
-     */
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-        argumentResolvers.add(new ContextArgumentResolver(userQueryInterface));
+        // Check if the startup class is annotated with @EnableUserInfoArgResolver
+        if (isAnnotationPresent(EnableUserInfoArgResolver.class)) {
+            argumentResolvers.add(new ContextArgumentResolver(userQueryInterface));
+        }
     }
 
+    private boolean isAnnotationPresent(Class<EnableUserInfoArgResolver> annotationClass) {
+        // Iterate over all beans and check for the specified annotation
+        String[] beanNames = applicationContext.getBeanDefinitionNames();
+        for (String beanName : beanNames) {
+            Class<?> beanType = applicationContext.getType(beanName);
+            if (beanType != null && AnnotationUtils.findAnnotation(beanType, annotationClass) != null) {
+                return true;
+            }
+        }
+        return false;
+    }
     /**
      * 注册 拦截器
      *
@@ -40,13 +54,15 @@ public class LoginArgResolverConfig implements WebMvcConfigurer {
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        if (getHandlerInterceptor() != null) {
-            String[] commonPathPatterns = getExcludeCommonPathPatterns();
-            registry.addInterceptor(getHandlerInterceptor())
-                    .addPathPatterns("/**")
-                    .order(10)
-                    .excludePathPatterns(commonPathPatterns);
-            WebMvcConfigurer.super.addInterceptors(registry);
+        if (isAnnotationPresent(EnableUserInfoArgResolver.class)) {
+            if (getHandlerInterceptor() != null) {
+                String[] commonPathPatterns = getExcludeCommonPathPatterns();
+                registry.addInterceptor(getHandlerInterceptor())
+                        .addPathPatterns("/**")
+                        .order(10)
+                        .excludePathPatterns(commonPathPatterns);
+                WebMvcConfigurer.super.addInterceptors(registry);
+            }
         }
     }
 

@@ -4,13 +4,14 @@ import lombok.Data;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Date;
 
 @Component
 @Data
 public class EasyJobConfig {
 
-    @Value("${easyjob.node.id:1}")
     private String nodeId;
 
     /**
@@ -73,13 +74,18 @@ public class EasyJobConfig {
     @Value("${easyjob.recover.seconds:60}")
     private int recoverSeconds;
 
-//    @Bean(name = "easyjobDataSource")
-//    @Qualifier("easyjobDataSource")
-//    @ConfigurationProperties(prefix="easyjob.datasource")
-//    public DataSource primaryDataSource() {
-//        return DataSourceBuilder.create().build();
-//    }
 
+
+
+    public String getNodeId() {
+        try {
+            return InetAddress.getLocalHost().getHostAddress();
+        } catch (UnknownHostException e) {
+            // Log the error or return a default value
+            System.err.println("Unable to get local IP address: " + e.getMessage());
+            return "unknown";
+        }
+    }
     /**
      * 系统启动时间
      */

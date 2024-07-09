@@ -25,9 +25,6 @@ import java.util.concurrent.*;
 
 /**
  * 任务调度器
- *
- * @author rongdi
- * @date 2019-03-13 21:15
  */
 @Component
 public class TaskExecutor {

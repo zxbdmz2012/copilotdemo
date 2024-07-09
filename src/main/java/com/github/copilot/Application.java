@@ -1,5 +1,7 @@
 package com.github.copilot;
 
+import com.github.copilot.configcenter.client.annotation.EnableConfigClient;
+import com.github.copilot.configcenter.server.annotation.EnableConfigServer;
 import com.github.copilot.exception.annotation.EnableGlobalExceptionHandler;
 import com.github.copilot.user.annotation.EnableUserInfoArgResolver;
 import org.springframework.boot.SpringApplication;
@@ -14,6 +16,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableGlobalExceptionHandler
 @EntityScan(basePackages = {"com.github.copilot.schedule.entity", "com.github.copilot.configcenter.entity","com.github.copilot.exception.entity"})
 @EnableJpaRepositories({"com.github.copilot.schedule.repository", "com.github.copilot.configcenter.repository","com.github.copilot.exception.repository"})
+
+@EnableConfigServer
+@EnableConfigClient
 public class Application {
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);

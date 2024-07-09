@@ -34,5 +34,7 @@ public class Node extends BaseEntity {
 
     private String notifyValue;
 
-
+    public Node(String nodeId) {
+        this.nodeId = nodeId;
+    }
 }

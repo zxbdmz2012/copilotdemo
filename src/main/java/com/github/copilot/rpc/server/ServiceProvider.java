@@ -1,5 +1,7 @@
 package com.github.copilot.rpc.server;
 
+import com.github.copilot.util.SpringContextUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -10,48 +12,19 @@ import java.util.logging.Logger;
 // ServiceProvider is a class that manages the services in the application.
 // It maintains a map where the keys are the names of the service interfaces and the values are the service instances.
 @Component
+@Slf4j
 public class ServiceProvider {
-    // A logger to log warning messages.
-    private static final Logger LOGGER = Logger.getLogger(ServiceProvider.class.getName());
-    // A map to store the service instances. The key is the name of the service interface, and the value is the service instance.
-    private final Map<String, Object> interfaceProvider;
 
-    // Constructor for the ServiceProvider. It initializes the interfaceProvider map.
-    public ServiceProvider() {
-        this.interfaceProvider = new HashMap<>();
-    }
 
-    // This method adds a service to the interfaceProvider map.
-    // It takes the service class and the service instance as parameters.
-    // It registers all interfaces implemented by the service instance, as well as the service class itself.
-    public void addService(Class serviceClass, Object serviceInstance) {
-        // Register all interfaces implemented by the service object
-        Class<?>[] interfaces = serviceInstance.getClass().getInterfaces();
-        if (interfaces.length == 0) {
-            LOGGER.log(Level.WARNING, "The service instance does not implement any interfaces: {0}", serviceInstance.getClass().getName());
-            return;
-        }
-        for (Class clazz : interfaces) {
-            interfaceProvider.put(clazz.getName(), serviceInstance);
-        }
-        // Also register the service class itself
-        interfaceProvider.put(serviceClass.getName(), serviceInstance);
-    }
-
-    // This method adds a service to the interfaceProvider map.
-    // It takes the service instance as a parameter.
-    // It calls the addService method with the service class and the service instance as parameters.
-    public void addService(Object serviceInstance) {
-        addService(serviceInstance.getClass(), serviceInstance);
-    }
-
-    // This method retrieves a service from the interfaceProvider map.
-    // It takes the name of the service interface as a parameter.
-    // It returns the service instance if it exists, or null if it doesn't.
     public Object getService(String interfaceName) {
-        Object service = interfaceProvider.get(interfaceName);
+        Object service = null;
+        try {
+            service = SpringContextUtil.getBean(Class.forName(interfaceName));
+        } catch (ClassNotFoundException e) {
+            log.error( "Class not found for interface: {}", interfaceName);
+        }
         if (service == null) {
-            LOGGER.log(Level.WARNING, "No service registered for interface: {0}", interfaceName);
+            log.error( "No service registered for interface: {}", interfaceName);
         }
         return service;
     }

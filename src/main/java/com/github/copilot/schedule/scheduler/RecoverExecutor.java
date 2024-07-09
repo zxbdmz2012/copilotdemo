@@ -1,6 +1,8 @@
 package com.github.copilot.schedule.scheduler;
 
 import com.github.copilot.schedule.config.EasyJobConfig;
+import com.github.copilot.schedule.entity.Node;
+import com.github.copilot.schedule.entity.Task;
 import com.github.copilot.schedule.enums.NotifyCmd;
 import com.github.copilot.schedule.enums.TaskStatus;
 import com.github.copilot.schedule.handles.NotifyHandler;
@@ -82,7 +84,6 @@ public class RecoverExecutor {
          */
         Node currNode = nodeRepository.getByNodeId(node.getNodeId());
         if (currNode == null) {
-            node.setRow_num(nodeRepository.getNextRownum());
             nodeRepository.insert(node);
         } else {
             nodeRepository.updateHeartBeat(node.getNodeId());
@@ -120,11 +121,15 @@ public class RecoverExecutor {
      * @param nodeId
      * @return
      */
-    private long chooseNodeId(List<Node> nodes, long maxNodeId, long nodeId) {
-        if (nodes.size() == 0 || nodeId >= maxNodeId) {
+    private String chooseNodeId(List<Node> nodes, String maxNodeId, String nodeId) {
+        if(nodes.isEmpty() || getNodeIdHashCode(nodeId)>= getNodeIdHashCode(maxNodeId)){
             return nodes.get(0).getNodeId();
         }
-        return nodes.stream().filter(node -> node.getNodeId() > nodeId).findFirst().get().getNodeId();
+        return nodes.stream().filter(node -> getNodeIdHashCode(node.getNodeId()) > getNodeIdHashCode(nodeId)).findFirst().get().getNodeId();
+    }
+
+    private int getNodeIdHashCode(String nodeId) {
+        return Math.abs(nodeId.hashCode());
     }
 
     class Recover implements Runnable {
@@ -152,17 +157,17 @@ public class RecoverExecutor {
                     if (nodes == null || nodes.isEmpty()) {
                         return;
                     }
-                    long maxNodeId = nodes.get(nodes.size() - 1).getNodeId();
+                    String maxNodeId = nodes.get(nodes.size() - 1).getNodeId();
                     for (Task task : tasks) {
                         /**
                          * 每个节点有一个恢复线程，为了避免不必要的竞争,从可用节点找到一个最靠近任务所属节点的节点
                          */
-                        long currNodeId = chooseNodeId(nodes, maxNodeId, task.getNodeId());
-                        long myNodeId = config.getNodeId();
+                        String recoverNodeId = chooseNodeId(nodes, maxNodeId, task.getNodeId());
+                        String myNodeId = config.getNodeId();
                         /**
                          * 如果不该当前节点处理直接跳过
                          */
-                        if (currNodeId != myNodeId) {
+                        if (!recoverNodeId.equalsIgnoreCase( myNodeId)) {
                             continue;
                         }
                         /**
@@ -173,7 +178,7 @@ public class RecoverExecutor {
                         task.setStatus(TaskStatus.PENDING);
                         task.setNextStartTime(new Date());
                         task.setNodeId(config.getNodeId());
-                        taskRepository.updateWithVersion(task);
+                        taskRepository.updateTask(task);
                     }
 
                 } catch (Exception e) {

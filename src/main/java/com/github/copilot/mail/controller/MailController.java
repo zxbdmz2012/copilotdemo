@@ -1,6 +1,5 @@
 package com.github.copilot.mail.controller;
 
-
 import com.alibaba.fastjson.JSONObject;
 import com.github.copilot.mail.model.BaseMessage;
 import com.github.copilot.mail.service.MailManageService;
@@ -9,7 +8,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-
+/**
+ * Controller for handling mail operations.
+ */
 @Slf4j
 @RestController
 @RequestMapping("/api/mail")
@@ -17,16 +18,17 @@ public class MailController {
 
     @Autowired
     private MailManageService manageService;
-    @Autowired
-    private MailSendService sendService;
 
     /**
-     * @Description: 通用发送邮件接口
+     * General email sending interface.
+     *
+     * @param baseMessage The base message to be sent.
+     * @return A response indicating the result of the preposition operation.
      */
-    @RequestMapping(value = "/general/send", method = RequestMethod.POST, produces = "application/json")
+    @PostMapping(value = "/general/send", produces = "application/json")
     @ResponseBody
     public String generalSend(@RequestBody BaseMessage baseMessage) {
-        log.info("[通用请求]开始请求发送邮件, 业务原始请求参数为: {}", JSONObject.toJSONString(baseMessage));
+        log.info("[General Request] Starting mail send request, original request parameters: {}", JSONObject.toJSONString(baseMessage));
         return manageService.preposition(baseMessage);
     }
 

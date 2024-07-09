@@ -5,9 +5,6 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 延时队列中的元素
- *
- * @author rongdi
- * @date 2019-03-13 21:05
  */
 public class DelayItem<T> implements Delayed {
 

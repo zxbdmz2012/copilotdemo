@@ -4,9 +4,7 @@ package com.github.copilot.mail.ssl;
 import javax.net.ssl.X509TrustManager;
 import java.security.cert.X509Certificate;
 
-/**
- * @Description: 邮箱信证管理
- */
+
 public class MailTrustManager implements X509TrustManager {
 
     public void checkClientTrusted(X509Certificate[] cert, String authType) {

@@ -9,10 +9,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 
-/**
- * @author lc
- * @Description: 邮件ssl
- */
+
 public class MailSSLSocketFactory extends SSLSocketFactory {
     private SSLSocketFactory factory;
 

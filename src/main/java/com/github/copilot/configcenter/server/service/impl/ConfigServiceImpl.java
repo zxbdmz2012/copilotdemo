@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.github.copilot.configcenter.common.model.ConfigVO;
 import com.github.copilot.configcenter.common.model.Result;
 import com.github.copilot.configcenter.entity.ConfigDO;
+import com.github.copilot.configcenter.server.annotation.EnableConfigServer;
 import com.github.copilot.configcenter.server.dao.ConfigDAO;
 import com.github.copilot.configcenter.server.model.ConfigBO;
 import com.github.copilot.configcenter.server.model.ConfigPolingTask;
@@ -13,6 +14,7 @@ import com.github.copilot.configcenter.server.service.ConfigSyncService;
 import com.github.copilot.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.AsyncContext;
@@ -29,8 +31,8 @@ import java.util.stream.Collectors;
 @Service
 public class ConfigServiceImpl implements ConfigService {
 
-    private final ExecutorService respExecutor;
-    private final ConfigPolingTasksHolder configPolingTasksHolder;
+    private  ExecutorService respExecutor;
+    private  ConfigPolingTasksHolder configPolingTasksHolder;
     @Autowired
     private ConfigDAO configDAO;
     @Autowired
@@ -39,17 +41,22 @@ public class ConfigServiceImpl implements ConfigService {
     private ConfigSyncServiceImpl syncService;
     private int respThreadNum;
 
-    public ConfigServiceImpl() {
-        configPolingTasksHolder = new ConfigPolingTasksHolder();
-        //构建用于响应长轮询的线程池
-        respExecutor = new ThreadPoolExecutor(100, 5000,
-                0, TimeUnit.SECONDS,
-                new ArrayBlockingQueue<>(102400),
-                this::newRespThread,
-                new ThreadPoolExecutor.CallerRunsPolicy());
-        //每1秒轮询执行一次任务超时检测
-        ScheduledExecutorService timeoutCheckExecutor = new ScheduledThreadPoolExecutor(1, this::newCheckThread);
-        timeoutCheckExecutor.scheduleAtFixedRate(this::responseTimeoutTask, 0, 1, TimeUnit.SECONDS);
+    public ConfigServiceImpl(ApplicationContext applicationContext) {
+        boolean isConfigServerEnabled = !applicationContext.getBeansWithAnnotation(EnableConfigServer.class).isEmpty();
+        if (isConfigServerEnabled) {
+            configPolingTasksHolder = new ConfigPolingTasksHolder();
+            //构建用于响应长轮询的线程池
+            respExecutor = new ThreadPoolExecutor(100, 5000,
+                    0, TimeUnit.SECONDS,
+                    new ArrayBlockingQueue<>(102400),
+                    this::newRespThread,
+                    new ThreadPoolExecutor.CallerRunsPolicy());
+            //每1秒轮询执行一次任务超时检测
+            ScheduledExecutorService timeoutCheckExecutor = new ScheduledThreadPoolExecutor(1, this::newCheckThread);
+            timeoutCheckExecutor.scheduleAtFixedRate(this::responseTimeoutTask, 0, 1, TimeUnit.SECONDS);
+
+        }
+
     }
 
     public static ConfigVO configBO2ConfigVO(ConfigBO configBO) {

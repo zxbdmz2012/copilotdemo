@@ -15,7 +15,6 @@ public class DataBaseProperties {
 
     private String diverClassName;
 
-    //password
     private String password;
 
 }

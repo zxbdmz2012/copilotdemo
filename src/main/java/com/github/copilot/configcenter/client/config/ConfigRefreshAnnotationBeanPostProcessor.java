@@ -3,6 +3,7 @@ package com.github.copilot.configcenter.client.config;
 
 import com.github.copilot.configcenter.client.ConfigCenterClient;
 import com.github.copilot.configcenter.client.annotation.ConfigRefresh;
+import com.github.copilot.configcenter.client.annotation.EnableConfigClient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -13,6 +14,8 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -21,8 +24,14 @@ import org.springframework.util.ReflectionUtils;
 
 
 @Slf4j
-public class ConfigRefreshAnnotationBeanPostProcessor implements ApplicationRunner, BeanPostProcessor, BeanFactoryAware, EnvironmentAware {
+public class ConfigRefreshAnnotationBeanPostProcessor implements ApplicationRunner, BeanPostProcessor, BeanFactoryAware, EnvironmentAware, ApplicationContextAware {
 
+    private ApplicationContext applicationContext;
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
     private Environment environment;
 
     private ConfigurableBeanFactory beanFactory;
@@ -79,7 +88,11 @@ public class ConfigRefreshAnnotationBeanPostProcessor implements ApplicationRunn
 
     @Override
     public void run(ApplicationArguments args) {
-        ConfigCenterClient configCenterClient = ConfigCenterClient.getInstance(null);
-        configCenterClient.startSpringBootLongPolling((ConfigurableEnvironment) environment, beanFactory);
+        boolean isConfigClientEnabled = applicationContext.getBeansWithAnnotation(EnableConfigClient.class).size() > 0;
+
+        if (isConfigClientEnabled) {
+            ConfigCenterClient configCenterClient = ConfigCenterClient.getInstance(null);
+            configCenterClient.startSpringBootLongPolling((ConfigurableEnvironment) environment, beanFactory);
+        }
     }
 }
