@@ -3,14 +3,15 @@ package com.github.copilot.schedule.enums;
 import lombok.Getter;
 
 /**
- * 节点状态枚举类
+ * Enum for representing the status of nodes in a distributed system.
+ * This enum is used to indicate whether a node is enabled or disabled for task execution.
  */
 @Getter
 public enum NodeStatus {
 
-    //待执行
+    // Indicates the node is disabled and not executing tasks.
     DISABLE(0),
-    //执行中
+    // Indicates the node is enabled and currently executing tasks.
     ENABLE(1);
 
     int id;
@@ -27,5 +28,4 @@ public enum NodeStatus {
                 return DISABLE;
         }
     }
-
 }

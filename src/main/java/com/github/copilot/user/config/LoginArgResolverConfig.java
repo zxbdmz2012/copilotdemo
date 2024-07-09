@@ -17,7 +17,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.util.List;
 
 /**
- * 公共配置类, 一些公共工具配置
+ * Configuration class for setting up argument resolvers and interceptors related to user information.
+ * This class implements the {@link WebMvcConfigurer} interface to customize the configuration for web MVC.
+ * It is responsible for adding custom argument resolvers and interceptors that facilitate the handling
+ * of user-related data throughout the application.
  */
 @Component
 public class LoginArgResolverConfig implements WebMvcConfigurer {
@@ -28,16 +31,30 @@ public class LoginArgResolverConfig implements WebMvcConfigurer {
     @Autowired
     private UserQueryInterface userQueryInterface;
 
+    /**
+     * Adds custom argument resolvers to the application context.
+     * This method checks if the application is annotated with {@link EnableUserInfoArgResolver}
+     * and adds a {@link ContextArgumentResolver} to the list of argument resolvers if so.
+     * The {@link ContextArgumentResolver} is used to resolve user information from the request context.
+     *
+     * @param argumentResolvers The list of configured argument resolvers.
+     */
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> argumentResolvers) {
-        // Check if the startup class is annotated with @EnableUserInfoArgResolver
         if (isAnnotationPresent(EnableUserInfoArgResolver.class)) {
             argumentResolvers.add(new ContextArgumentResolver(userQueryInterface));
         }
     }
 
+    /**
+     * Checks if the application is annotated with a specific annotation.
+     * This method iterates over all beans in the application context and checks if any
+     * are annotated with the {@link EnableUserInfoArgResolver} annotation.
+     *
+     * @param annotationClass The annotation class to check for.
+     * @return true if the annotation is present on any bean, false otherwise.
+     */
     private boolean isAnnotationPresent(Class<EnableUserInfoArgResolver> annotationClass) {
-        // Iterate over all beans and check for the specified annotation
         String[] beanNames = applicationContext.getBeanDefinitionNames();
         for (String beanName : beanNames) {
             Class<?> beanType = applicationContext.getType(beanName);
@@ -47,10 +64,14 @@ public class LoginArgResolverConfig implements WebMvcConfigurer {
         }
         return false;
     }
+
     /**
-     * 注册 拦截器
+     * Registers interceptors in the application context.
+     * This method checks if the application is annotated with {@link EnableUserInfoArgResolver}
+     * and adds a {@link ContextHandlerInterceptor} to the interceptor registry if so.
+     * The {@link ContextHandlerInterceptor} is used to handle user context before processing requests.
      *
-     * @param registry
+     * @param registry The interceptor registry.
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
@@ -66,12 +87,23 @@ public class LoginArgResolverConfig implements WebMvcConfigurer {
         }
     }
 
+    /**
+     * Provides the {@link HandlerInterceptor} to be registered.
+     * This method returns an instance of {@link ContextHandlerInterceptor},
+     * which is responsible for handling user context in incoming requests.
+     *
+     * @return An instance of {@link ContextHandlerInterceptor}.
+     */
     protected HandlerInterceptor getHandlerInterceptor() {
         return new ContextHandlerInterceptor();
     }
 
     /**
-     * auth-client 中的拦截器需要排除拦截的地址
+     * Specifies URL patterns to be excluded from the interceptor.
+     * This method returns an array of URL patterns that should not be intercepted
+     * by the {@link ContextHandlerInterceptor}, such as error paths and static resources.
+     *
+     * @return An array of URL patterns to exclude.
      */
     protected String[] getExcludeCommonPathPatterns() {
         String[] urls = {

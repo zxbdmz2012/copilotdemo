@@ -5,46 +5,48 @@ import lombok.Data;
 import java.util.Map;
 import java.util.function.Predicate;
 
-
+/**
+ * Represents an HTTP request, including URL, method, headers, body, timeouts, retry count, and a predicate for success.
+ */
 @Data
 public class HttpReqBO {
     /**
-     * 地址
+     * The URL to which the request will be sent.
      */
     private String url;
 
     /**
-     * 请求方式
+     * The HTTP method (e.g., GET, POST) of the request.
      */
     private String method;
 
     /**
-     * 请求头
+     * A map of header names to values for the request.
      */
     private Map<String, String> header;
 
     /**
-     * 请求体
+     * The body of the request, if any.
      */
     private byte[] body;
 
     /**
-     * 连接超时（ms）
+     * The timeout in milliseconds for establishing a connection.
      */
     private int connectTimeout = 2000;
 
     /**
-     * 读取超时（ms）
+     * The timeout in milliseconds for reading the response.
      */
     private int readTimeout = 2000;
 
     /**
-     * 重试次数
+     * The number of times to retry the request in case of failure.
      */
     private int retry;
 
     /**
-     * 响应成功的判断方法
+     * A predicate that determines whether the response to the request is considered successful.
      */
     private Predicate<HttpRespBO> respPredicate = HttpRespBO::success;
 }

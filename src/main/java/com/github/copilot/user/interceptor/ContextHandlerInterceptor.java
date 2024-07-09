@@ -11,13 +11,20 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 /**
- * 网关：
- * 获取header，并解析，然后将所有的用户、应用信息封装到请求头
- * <p>
- * 拦截器：
- * 解析请求头数据， 将用户信息、应用信息封装到BaseContextHandler
- * 考虑请求来源是否网关（ip等）
- * <p>
+ * Interceptor for handling user context within incoming requests.
+ * This interceptor is responsible for extracting user-related information from the request headers,
+ * such as the user ID, and storing it in a thread-local context using {@link BaseContextHandler}.
+ * It ensures that user context is available throughout the processing of the request.
+ *
+ * The interceptor also handles the cleanup of the thread-local context after the request has been processed
+ * to prevent memory leaks.
+ *
+ * The process involves:
+ * - Checking if the handler is an instance of {@link HandlerMethod} to ensure that the interceptor
+ *   only processes requests that are mapped to controller methods.
+ * - Extracting the user ID from the request headers and storing it in the thread-local context.
+ * - Logging and handling any exceptions that occur during header parsing.
+ * - Removing the thread-local context after the request has been processed.
  */
 @Slf4j
 public class ContextHandlerInterceptor extends HandlerInterceptorAdapter {
@@ -32,7 +39,7 @@ public class ContextHandlerInterceptor extends HandlerInterceptorAdapter {
             BaseContextHandler.set(UserContextConstants.userIdHeader, userId);
 
         } catch (Exception e) {
-            log.warn("解析header信息时，发生异常. ", e);
+            log.warn("error while getting userId from header", e);
         }
         return super.preHandle(request, response, handler);
     }

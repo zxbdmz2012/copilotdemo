@@ -1,5 +1,8 @@
 package com.github.copilot.schedule.enums;
-
+/**
+ * Enum for representing different time zones.
+ * This enum can be used to specify the time zone context for scheduling tasks.
+ */
 public enum TimeZoneEnum {
     EST("EST"),
     CST("CST"),

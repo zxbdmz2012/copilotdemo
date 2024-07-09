@@ -16,9 +16,7 @@ import org.apache.poi.util.Units;
 import java.awt.*;
 import java.util.Map;
 
-/**
- * @Description: Pdf表格渲染器
- */
+
 public class PdfTableRenderer<T extends Picture> extends TableRenderer {
     private final Map<Position, T> pos2picture;
 

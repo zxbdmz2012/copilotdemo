@@ -3,22 +3,23 @@ package com.github.copilot.schedule.enums;
 import lombok.Getter;
 
 /**
- * 任务状态枚举类
+ * Enum representing the various statuses a task can have within the system.
+ * It defines the lifecycle stages of a task from not started to completed or stopped.
  */
 @Getter
 public enum TaskStatus {
 
-    //未开始
+    // Indicates the task has not started yet.
     NOT_STARTED(0),
-    //待执行
+    // Indicates the task is scheduled and waiting to be executed.
     PENDING(1),
-    //执行中
+    // Indicates the task is currently being executed.
     DOING(2),
-    //异常
+    // Indicates the task encountered an error during execution.
     ERROR(3),
-    //已完成
+    // Indicates the task has completed its execution successfully.
     FINISH(4),
-    //已停止
+    // Indicates the task has been manually stopped before completion.
     STOP(5);
 
     int id;
@@ -43,5 +44,4 @@ public enum TaskStatus {
                 return NOT_STARTED;
         }
     }
-
 }

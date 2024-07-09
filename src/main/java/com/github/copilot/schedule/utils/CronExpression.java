@@ -6,19 +6,9 @@ import java.io.Serializable;
 import java.text.ParseException;
 import java.util.*;
 
-/**
- * cron表达式工具，这里直接是复制的哪个框架里面的代码
- */
+
 public class CronExpression implements Serializable, Cloneable {
-    protected static final int SECOND = 0;
-    protected static final int MINUTE = 1;
-    protected static final int HOUR = 2;
-    protected static final int DAY_OF_MONTH = 3;
-    protected static final int MONTH = 4;
-    protected static final int DAY_OF_WEEK = 5;
-    protected static final int YEAR = 6;
-    protected static final int ALL_SPEC_INT = 99;
-    protected static final int NO_SPEC_INT = 98;
+
     protected static final Integer ALL_SPEC = new Integer(99);
     protected static final Integer NO_SPEC = new Integer(98);
     private static final long serialVersionUID = 12423409423L;

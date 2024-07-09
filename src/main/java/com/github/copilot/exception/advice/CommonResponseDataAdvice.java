@@ -13,16 +13,37 @@ import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
-
+/**
+ * A controller advice that ensures all responses from controllers adhere to a standardized format.
+ * This class intercepts responses before they are sent to the client, allowing for modification or wrapping
+ * to ensure consistency across the application. It is particularly useful for ensuring that responses
+ * from different parts of the application follow the same structure, simplifying client-side handling.
+ */
 @RestControllerAdvice
 public class CommonResponseDataAdvice implements ResponseBodyAdvice<Object> {
 
     private final GlobalDefaultProperties globalDefaultProperties;
 
+    /**
+     * Constructs a new CommonResponseDataAdvice instance with global default properties.
+     * These properties can be used to configure the behavior of the advice, such as filtering
+     * which controllers or packages it applies to.
+     *
+     * @param globalDefaultProperties The global default properties to apply to this advice.
+     */
     public CommonResponseDataAdvice(GlobalDefaultProperties globalDefaultProperties) {
         this.globalDefaultProperties = globalDefaultProperties;
     }
 
+    /**
+     * Determines if the advice supports the given controller method.
+     * This can be used to selectively apply the advice to certain responses based on the controller,
+     * method annotations, or other criteria.
+     *
+     * @param methodParameter The method parameter of the controller method.
+     * @param aClass The class of the message converter.
+     * @return true if the advice should be applied to the response, false otherwise.
+     */
     @Override
     @SuppressWarnings("all")
     public boolean supports(MethodParameter methodParameter,
@@ -30,6 +51,19 @@ public class CommonResponseDataAdvice implements ResponseBodyAdvice<Object> {
         return filter(methodParameter);
     }
 
+    /**
+     * Modifies or wraps the body of the response before it is sent to the client.
+     * This method is called after the controller method has executed and before the response
+     * is written. It can modify the response body to ensure it follows the standardized format.
+     *
+     * @param o The body of the response from the controller method.
+     * @param methodParameter The method parameter of the controller method.
+     * @param mediaType The media type of the response.
+     * @param aClass The class of the message converter.
+     * @param serverHttpRequest The server HTTP request.
+     * @param serverHttpResponse The server HTTP response.
+     * @return The modified or wrapped response body.
+     */
     @Nullable
     @Override
     @SuppressWarnings("all")
@@ -37,41 +71,47 @@ public class CommonResponseDataAdvice implements ResponseBodyAdvice<Object> {
                                   Class<? extends HttpMessageConverter<?>> aClass, ServerHttpRequest serverHttpRequest,
                                   ServerHttpResponse serverHttpResponse) {
 
-        // 返回值为 Object 类型  并且返回为空是  AbstractMessageConverterMethodProcessor#writeWithMessageConverters 方法
-        // 无法触发调用本类的 beforeBodyWrite 处理，开发在 Controller 尽量避免直接使用 Object 类型返回。
-
-        // o is null -> return response
+        // Handle null response body
         if (o == null) {
-            // 当 o 返回类型为 string 并且为null会出现 java.lang.ClassCastException: Result cannot be cast to java.lang.String
             if (methodParameter.getParameterType().getName().equals("java.lang.String")) {
                 return JSON.toJSON(R.ofSuccess()).toString();
             }
             return R.ofSuccess();
         }
-        // o is instanceof ConmmonResponse -> return o
+        // Directly return if the response is already in the desired format
         if (o instanceof R) {
             return (R<Object>) o;
         }
-        // string 特殊处理 java.lang.ClassCastException: Result cannot be cast to java.lang.String
+        // Special handling for String responses to avoid ClassCastException
         if (o instanceof String) {
             return JSON.toJSON(R.ofSuccess(o)).toString();
         }
+        // Wrap the response body in the standardized format
         return R.ofSuccess(o);
     }
 
+    /**
+     * Filters the controller methods to which this advice applies.
+     * This method checks the controller's package, class name, and method annotations
+     * against configured filters to determine if the advice should be applied.
+     *
+     * @param methodParameter The method parameter of the controller method.
+     * @return true if the advice should be applied, false if it should be skipped.
+     */
     private Boolean filter(MethodParameter methodParameter) {
         Class<?> declaringClass = methodParameter.getDeclaringClass();
-        // 检查过滤包路径
+        // Check package filters
         long count = globalDefaultProperties.getAdviceFilterPackage().stream()
                 .filter(l -> declaringClass.getName().contains(l)).count();
         if (count > 0) {
             return false;
         }
-        // 检查<类>过滤列表
+        // Check class filters
         if (globalDefaultProperties.getAdviceFilterClass().contains(declaringClass.getName())) {
             return false;
         }
 
+        // Apply advice if the method is annotated with @Result
         return methodParameter.getMethod().isAnnotationPresent(Result.class);
     }
 

@@ -11,25 +11,32 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * 任务对象数据库操作对象
+ * Repository component for managing {@link Node} entities.
+ * Provides methods for inserting, updating, and querying node entities in the database.
+ * It includes operations for updating node heartbeat, handling notifications, enabling/disabling nodes,
+ * and retrieving nodes based on their status and update time.
  */
 @Component
 public class NodeRepository {
 
-
     @Resource
     private NodeJpaRepository nodeJpaRepository;
 
+    /**
+     * Inserts a new node entity into the database.
+     *
+     * @param node The node entity to insert.
+     * @return The inserted node entity.
+     */
     public Node insert(Node node) {
         return nodeJpaRepository.save(node);
     }
 
     /**
-     * 更新节点心跳时间和序号
+     * Updates the heartbeat timestamp of a node.
      *
-     * @param nodeId 待更新节点ID
-     * @return
-     * @throws Exception
+     * @param nodeId The ID of the node to update.
+     * @return The updated node entity, or null if the node does not exist.
      */
     public Node updateHeartBeat(String nodeId) {
         Node node = nodeJpaRepository.findByNodeId(nodeId);
@@ -41,11 +48,12 @@ public class NodeRepository {
     }
 
     /**
-     * 更新节点的通知信息,实现修改任务，停止任务通知等
+     * Updates the notification command and value for a node.
      *
-     * @param cmd         通知指令
-     * @param notifyValue 通知的值，一般存id
-     * @return
+     * @param nodeId The ID of the node to update.
+     * @param cmd The notification command to set.
+     * @param notifyValue The notification value to set.
+     * @return 1 if the update was successful, 0 otherwise.
      */
     public int updateNotifyInfo(String nodeId, NotifyCmd cmd, String notifyValue) {
         Node node = nodeJpaRepository.findByNodeId(nodeId);
@@ -59,10 +67,11 @@ public class NodeRepository {
     }
 
     /**
-     * 当通知执行完后使用乐观锁重置通知信息
+     * Resets the notification information for a node using optimistic locking.
      *
-     * @param cmd
-     * @return
+     * @param nodeId The ID of the node to reset.
+     * @param cmd The notification command to reset.
+     * @return 1 if the reset was successful, 0 otherwise.
      */
     public int resetNotifyInfo(String nodeId, NotifyCmd cmd) {
         Node node = nodeJpaRepository.findByNodeId(nodeId);
@@ -76,7 +85,10 @@ public class NodeRepository {
     }
 
     /**
-     * 禁用节点
+     * Disables a node, preventing it from executing tasks.
+     *
+     * @param nodeDisabled The node to disable.
+     * @return 1 if the operation was successful, 0 otherwise.
      */
     public int disbale(Node nodeDisabled) {
         Node node = nodeJpaRepository.findByNodeId(nodeDisabled.getNodeId());
@@ -88,6 +100,12 @@ public class NodeRepository {
         return 0;
     }
 
+    /**
+     * Enables a node, allowing it to execute tasks.
+     *
+     * @param nodeEnabled The node to enable.
+     * @return 1 if the operation was successful, 0 otherwise.
+     */
     public int enable(Node nodeEnabled) {
         Node node = nodeJpaRepository.findByNodeId(nodeEnabled.getNodeId());
         if (Objects.nonNull(node)) {
@@ -98,13 +116,23 @@ public class NodeRepository {
         return 0;
     }
 
+    /**
+     * Retrieves a list of enabled nodes that have not updated their status within a specified timeout period.
+     *
+     * @param timeout The timeout period in seconds.
+     * @return A list of enabled nodes.
+     */
     public List<Node> getEnableNodes(int timeout) {
         return nodeJpaRepository.findByNodeStatusAndUpdateTimeBefore(NodeStatus.ENABLE, LocalDateTime.now().minusSeconds(timeout));
     }
 
+    /**
+     * Retrieves a node by its ID.
+     *
+     * @param nodeId The ID of the node to retrieve.
+     * @return The node entity, or null if not found.
+     */
     public Node getByNodeId(String nodeId) {
         return nodeJpaRepository.findByNodeId(nodeId);
     }
-
-
 }

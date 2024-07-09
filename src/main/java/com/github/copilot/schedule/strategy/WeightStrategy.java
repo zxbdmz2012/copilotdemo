@@ -6,24 +6,37 @@ import com.github.copilot.schedule.entity.Task;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Implements a strategy for task distribution based on node weights.
+ * This strategy selects tasks for execution based on the weight assigned to each node,
+ * ensuring that nodes with higher weights have a higher chance of receiving tasks.
+ */
 public class WeightStrategy implements Strategy {
 
+    /**
+     * Determines if the current node should accept the given task based on the node's weight.
+     *
+     * @param nodes The list of all nodes in the system.
+     * @param task The task to be distributed.
+     * @param myNodeId The ID of the current node.
+     * @return true if the current node should accept the task, false otherwise.
+     */
     @Override
     public boolean accept(List<Node> nodes, Task task, String myNodeId) {
-        // 找到当前节点
+        // Find the current node in the list of nodes.
         Node myNode = nodes.stream().filter(node -> node.getNodeId().equals(myNodeId)).findFirst().orElse(null);
         if (myNode == null) {
             return false;
         }
-        // 获取当前节点的索引
+        // Get the index of the current node.
         int myNodeIndex = nodes.indexOf(myNode);
-        // 计算当前节点之前所有节点的权重总和
+        // Calculate the sum of weights for all nodes before the current node.
         int preWeightSum = nodes.subList(0, myNodeIndex).stream().collect(Collectors.summingInt(Node::getWeight));
-        // 计算所有节点的权重总和
+        // Calculate the total sum of weights for all nodes.
         int weightSum = nodes.stream().collect(Collectors.summingInt(Node::getWeight));
-        // 根据任务ID对权重总和取余，得到余数
+        // Determine the task's position based on its ID and the total weight sum.
         int remainder = (int) (task.getId() % weightSum);
-        // 判断余数是否在当前节点的权重范围内
+        // Check if the remainder falls within the weight range of the current node.
         return remainder >= preWeightSum && remainder < preWeightSum + myNode.getWeight();
     }
 }

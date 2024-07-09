@@ -6,6 +6,7 @@ import com.github.copilot.schedule.entity.Task;
 import com.github.copilot.schedule.entity.TaskDetail;
 import com.github.copilot.schedule.enums.TaskStatus;
 import com.github.copilot.schedule.serializer.JdkSerializationSerializer;
+import com.github.copilot.schedule.serializer.JsonSerializationSerializer;
 import com.github.copilot.schedule.serializer.ObjectSerializer;
 import com.github.copilot.schedule.utils.CronExpression;
 import org.slf4j.Logger;
@@ -23,66 +24,68 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 任务对象数据库操作对象
+ * Repository class for managing task entities and their lifecycle.
+ * This class provides methods for querying, inserting, and updating tasks and task details in the database.
+ * It includes functionality for listing tasks based on their start times, managing task execution details,
+ * and handling task status updates with optimistic locking to ensure data consistency.
  */
 @Component
 public class TaskRepository {
     private static final Logger log = LoggerFactory.getLogger(TaskRepository.class);
+
     /**
-     * 序列化工具类
+     * Serializer for task invocation information.
      */
-    private final ObjectSerializer serializer = new JdkSerializationSerializer<Invocation>();
+    private final ObjectSerializer serializer = new JsonSerializationSerializer<Invocation>();
+
     @Resource
     private NodeJpaRepository nodeJpaRepository;
+
     @Resource
     private TaskJpaRepository taskJpaRepository;
+
     @Resource
     private TaskDetailJpaRepository taskDetailJpaRepository;
+
     @Autowired
     private EasyJobConfig config;
 
     /**
-     * 查询还需要指定时间才开始的主任务列表
-     * TIMESTAMPDIFF(SECOND,NOW(),next_start_time) < ? 这里用不到索引，会有效率问题
-     * next_start_time < date_sub(now(), interval ? second) 改成这种方式就好了
+     * Lists tasks that are not started and are scheduled to start within a specified duration.
      *
-     * @param duration
-     * @return
+     * @param duration The duration in seconds before the scheduled start time of the tasks.
+     * @return A list of tasks that meet the criteria.
      */
     public List<Task> listNotStartedTasks(int duration) {
         return taskJpaRepository.findByStatusAndnextStartTimeBefore(TaskStatus.NOT_STARTED, LocalDateTime.now().minusSeconds(duration));
     }
 
     /**
-     * 查找所有的任务名称
+     * Lists all task names present in the database.
      *
-     * @return
+     * @return A list of all task names.
      */
     public List<String> listAllTaskNames() {
         return taskJpaRepository.findAll().stream().map(Task::getName).collect(Collectors.toList());
     }
 
     /**
-     * 列出指定任务的任务详情
+     * Lists details for a specific task identified by its ID.
      *
-     * @param taskId 任务id
-     * @return
+     * @param taskId The ID of the task.
+     * @return A list of task details associated with the specified task.
      */
     public List<TaskDetail> listDetails(Long taskId) {
         return taskDetailJpaRepository.findByTaskId(taskId);
     }
 
-
     /**
-     * 列出需要恢复的任务，需要恢复的任务是指所属执行节点已经挂了并且该任务还属于执行中的任务
-     * timestampdiff(SECOND,n.update_time,now()) > ? 这种用不到索引
-     * n.update_time < date_sub(now(), interval ? second) 换成这种
+     * Lists tasks that need to be recovered. A task needs recovery if its executing node is down and the task is still marked as executing.
      *
-     * @param timeout 超时时间
-     * @return
+     * @param timeout The timeout in seconds to consider a node as down.
+     * @return A list of tasks that meet the recovery criteria.
      */
     public List<Task> listRecoverTasks(int timeout) {
-
         ArrayList<TaskStatus> taskStatuses = new ArrayList<>();
         taskStatuses.add(TaskStatus.DOING);
         taskStatuses.add(TaskStatus.ERROR);
@@ -91,10 +94,10 @@ public class TaskRepository {
     }
 
     /**
-     * 根据指定id获取具体任务对象
+     * Retrieves a specific task by its ID.
      *
-     * @param id
-     * @return
+     * @param id The ID of the task.
+     * @return The task if found, null otherwise.
      */
     public Task get(Long id) {
         Task task = taskJpaRepository.findById(id).orElse(null);
@@ -105,26 +108,25 @@ public class TaskRepository {
     }
 
     /**
-     * 根据指定id获取具体任务明细对象
+     * Retrieves a specific task detail by its ID.
      *
-     * @param id
-     * @return
+     * @param id The ID of the task detail.
+     * @return The task detail if found, null otherwise.
      */
     public TaskDetail getDetail(Long id) {
         return taskDetailJpaRepository.findById(id).orElse(null);
     }
 
-
     /**
-     * 插入任务
+     * Inserts a new task into the database.
      *
-     * @param task 待插入任务
-     * @return
-     * @throws Exception
+     * @param task The task to insert.
+     * @return The ID of the inserted task.
+     * @throws Exception If there is an error during insertion.
      */
     public long insert(Task task) throws Exception {
-        CronExpression cronExpession = new CronExpression(task.getCronExpr());
-        Date nextStartDate = cronExpession.getNextValidTimeAfter(new Date());
+        CronExpression cronExpression = new CronExpression(task.getCronExpr());
+        Date nextStartDate = cronExpression.getNextValidTimeAfter(new Date());
         task.setFirstStartTime(nextStartDate);
         task.setNextStartTime(nextStartDate);
         task.setStatus(TaskStatus.NOT_STARTED);
@@ -133,10 +135,10 @@ public class TaskRepository {
     }
 
     /**
-     * 插入任务详情
+     * Inserts a new task detail into the database.
      *
-     * @param taskDetail 待插入任务详情
-     * @return
+     * @param taskDetail The task detail to insert.
+     * @return The ID of the inserted task detail.
      */
     public long insert(TaskDetail taskDetail) {
         TaskDetail save = taskDetailJpaRepository.save(taskDetail);
@@ -144,11 +146,11 @@ public class TaskRepository {
     }
 
     /**
-     * 开始一个任务
+     * Starts a task by creating a new task detail record for it.
      *
-     * @param task 待开始的任务
-     * @return
-     * @throws Exception
+     * @param task The task to start.
+     * @return The newly created task detail.
+     * @throws Exception If there is an error during the start operation.
      */
     public TaskDetail start(Task task) throws Exception {
         TaskDetail taskDetail = new TaskDetail(task.getId());
@@ -158,33 +160,23 @@ public class TaskRepository {
         return taskDetail;
     }
 
-
     /**
-     * 完成任务
+     * Marks a task and its detail as finished and calculates the next start time based on the cron expression.
      *
-     * @param task   待开始的任务
-     * @param detail 本次执行的具体任务详情
-     * @throws Exception
+     * @param task The task to mark as finished.
+     * @param detail The task detail associated with the current execution.
+     * @throws Exception If there is an error during the finish operation.
      */
     public void finish(Task task, TaskDetail detail) throws Exception {
-        CronExpression cronExpession = new CronExpression(task.getCronExpr());
-        Date nextStartDate = cronExpession.getNextValidTimeAfter(task.getNextStartTime());
-        /**
-         *  如果没有下次执行时间了，该任务就完成了，反之变成未开始
-         */
+        CronExpression cronExpression = new CronExpression(task.getCronExpr());
+        Date nextStartDate = cronExpression.getNextValidTimeAfter(task.getNextStartTime());
         if (nextStartDate == null) {
             task.setStatus(TaskStatus.FINISH);
         } else {
             task.setStatus(TaskStatus.NOT_STARTED);
         }
-        /**
-         * 增加任务成功次数
-         */
         task.setSuccessCount(task.getSuccessCount() + 1);
         task.setNextStartTime(nextStartDate);
-        /**
-         * 使用乐观锁检测是否可以更新成功，成功则更新详情
-         */
         if (updateTask(task)) {
             detail.setEndTime(new Date());
             detail.setStatus(TaskStatus.FINISH);
@@ -193,16 +185,15 @@ public class TaskRepository {
     }
 
     /**
-     * 记录任务失败信息
+     * Records failure information for a task and its detail.
      *
-     * @param task     待失败任务
-     * @param detail   任务详情
-     * @param errorMsg 出错信息
-     * @throws Exception
+     * @param task The task that failed.
+     * @param detail The task detail associated with the failed execution.
+     * @param errorMsg The error message describing the failure.
+     * @throws Exception If there is an error during the failure recording operation.
      */
     public void fail(Task task, TaskDetail detail, String errorMsg) throws Exception {
         if (detail == null) return;
-        //如果没有下次执行时间了，该任务就完成了，反之变成待执行
         task.setStatus(TaskStatus.ERROR);
         task.setFailCount(task.getFailCount() + 1);
         if (updateTask(task)) {
@@ -214,22 +205,31 @@ public class TaskRepository {
     }
 
     /**
-     * 重启服务后，重新把本节点的任务初始化为初始状态
+     * Reinitializes tasks to the NOT_STARTED status for the current node after a service restart.
      *
-     * @return
-     * @throws Exception
+     * @return The number of tasks reinitialized.
+     * @throws Exception If there is an error during the reinitialization.
      */
     public int reInitTasks() {
-
         return taskJpaRepository.updateStatusByNodeId(TaskStatus.NOT_STARTED, config.getNodeId());
     }
 
-
+    /**
+     * Reinitializes tasks to the NOT_STARTED status for a specified node.
+     *
+     * @param nodeId The ID of the node for which tasks should be reinitialized.
+     * @return The number of tasks reinitialized.
+     */
     public int reInitTasks(String nodeId) {
         return taskJpaRepository.updateStatusByNodeId(TaskStatus.NOT_STARTED, nodeId);
     }
 
-
+    /**
+     * Attempts to update a task detail in the database, retrying up to a maximum number of times in case of optimistic locking failures.
+     *
+     * @param taskDetail The task detail to update.
+     * @return true if the update was successful, false otherwise.
+     */
     public boolean updateTaskDetail(TaskDetail taskDetail) {
         int maxRetries = 3; // Maximum number of retries
         for (int attempt = 0; attempt < maxRetries; attempt++) {
@@ -248,7 +248,12 @@ public class TaskRepository {
         return false; // Should never reach here
     }
 
-
+    /**
+     * Attempts to update a task in the database, retrying in case of optimistic locking failures.
+     *
+     * @param task The task to update.
+     * @return true if the update was successful, false otherwise.
+     */
     public boolean updateTask(Task task) {
         int retryCount = 3; // Number of retries
         while (retryCount >= 0) {
@@ -267,6 +272,12 @@ public class TaskRepository {
         return false;
     }
 
+    /**
+     * Retrieves a task by its ID.
+     *
+     * @param taskId The ID of the task to retrieve.
+     * @return The task if found, null otherwise.
+     */
     public Task getTaskById(Long taskId) {
         return taskJpaRepository.findById(taskId).orElse(null);
     }

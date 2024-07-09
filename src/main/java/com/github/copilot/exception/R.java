@@ -4,40 +4,66 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.github.copilot.exception.exception.error.CommonErrorCode;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 
 /**
- * 返回统一数据结构
+ * A generic class for wrapping responses in a unified data structure.
+ * This class is designed to standardize the format of responses sent from the server to clients,
+ * encapsulating both successful results and error information. It implements Serializable to allow
+ * instances of this class to be easily serialized and deserialized, especially useful when sending data across networks.
+ *
+ * @param <T> The type of the data being returned in the response. This allows the class to be used
+ *            for any type of data, providing flexibility in response data types.
  */
+@Getter
+@Setter
 public class R<T> implements Serializable {
 
     /**
-     * 是否成功
+     * Indicates whether the operation associated with the response was successful.
      */
     private Boolean succ;
 
-
+    /**
+     * A unique identifier for the response, which can be used for logging or tracking purposes.
+     */
     private Long id;
 
     /**
-     * 成功数据
+     * The data payload of the response. This can be any type of data and is generic.
      */
     private T data;
 
     /**
-     * 错误码
+     * The error code associated with the response. This is typically used when the response
+     * represents an error or failure.
      */
     private String code;
 
     /**
-     * 错误描述
+     * A human-readable message providing more details about the response. This can be used
+     * to convey success messages or detailed error information.
      */
     private String msg;
 
+    /**
+     * Default constructor.
+     */
     public R() {
     }
 
+    /**
+     * Constructs a new response object with specified properties.
+     *
+     * @param succ Whether the operation was successful.
+     * @param id   The unique identifier for the response.
+     * @param data The data payload of the response.
+     * @param code The error code associated with the response.
+     * @param msg  The detailed message about the response.
+     */
     public R(Boolean succ, Long id, T data, String code, String msg) {
         this.succ = succ;
         this.id = id;
@@ -46,13 +72,23 @@ public class R<T> implements Serializable {
         this.msg = msg;
     }
 
+    /**
+     * Creates a success response without data.
+     *
+     * @return A new R instance representing a successful operation.
+     */
     public static R ofSuccess() {
         R r = new R();
         r.succ = true;
-
         return r;
     }
 
+    /**
+     * Creates a success response with data.
+     *
+     * @param data The data to include in the success response.
+     * @return A new R instance representing a successful operation with data.
+     */
     public static R ofSuccess(Object data) {
         R r = new R();
         r.succ = true;
@@ -60,6 +96,14 @@ public class R<T> implements Serializable {
         return r;
     }
 
+    /**
+     * Creates a failure response with an error code and message.
+     *
+     * @param code The error code.
+     * @param msg  The error message.
+     * @param id   The unique identifier for the response.
+     * @return A new R instance representing a failed operation.
+     */
     public static R ofFail(String code, String msg, Long id) {
         R r = new R();
         r.succ = false;
@@ -69,6 +113,15 @@ public class R<T> implements Serializable {
         return r;
     }
 
+    /**
+     * Creates a failure response with an error code, message, and data.
+     *
+     * @param code The error code.
+     * @param msg  The error message.
+     * @param data The data associated with the failure.
+     * @param id   The unique identifier for the response.
+     * @return A new R instance representing a failed operation with data.
+     */
     public static R ofFail(String code, String msg, Object data, Long id) {
         R r = new R();
         r.succ = false;
@@ -79,6 +132,13 @@ public class R<T> implements Serializable {
         return r;
     }
 
+    /**
+     * Creates a failure response based on a predefined common error code.
+     *
+     * @param resultEnum The common error code enumeration.
+     * @param id         The unique identifier for the response.
+     * @return A new R instance representing a failed operation based on a common error code.
+     */
     public static R ofFail(CommonErrorCode resultEnum, Long id) {
         R r = new R();
         r.id = id;
@@ -88,48 +148,14 @@ public class R<T> implements Serializable {
         return r;
     }
 
-    public Boolean getSucc() {
-        return succ;
-    }
-
-    public void setSucc(Boolean succ) {
-        this.succ = succ;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public T getData() {
-        return data;
-    }
-
-    public void setData(T data) {
-        this.data = data;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
-        this.code = code;
-    }
-
-    public String getMsg() {
-        return msg;
-    }
-
-    public void setMsg(String msg) {
-        this.msg = msg;
-    }
+    // Getters and setters omitted for brevity
 
     /**
-     * 获取 json
+     * Builds and returns a JSON string representation of the response object.
+     * This method uses the fastjson library to serialize the response object into a JSON string,
+     * excluding any circular references to prevent serialization errors.
+     *
+     * @return A JSON string representation of the response object.
      */
     public String buildResultJson() {
         JSONObject jsonObject = new JSONObject();

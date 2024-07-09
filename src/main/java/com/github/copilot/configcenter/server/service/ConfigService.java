@@ -1,57 +1,66 @@
 package com.github.copilot.configcenter.server.service;
 
-
 import com.github.copilot.configcenter.common.model.Result;
 import com.github.copilot.configcenter.server.model.ConfigBO;
 import com.github.copilot.configcenter.server.model.ConfigPolingTask;
 
 import java.util.List;
 
-
+/**
+ * Defines the contract for configuration management services.
+ * This interface outlines the operations for managing configuration data,
+ * including CRUD operations and listening for configuration changes.
+ */
 public interface ConfigService {
 
     /**
-     * 新增配置文件
+     * Adds a new configuration.
+     * This method is responsible for inserting a new configuration into the system.
      *
-     * @param configBO 配置参数
-     * @return Result
+     * @param configBO The configuration object containing the data to be inserted.
+     * @return A Result object indicating the outcome of the operation.
      */
     Result<Void> insertConfig(ConfigBO configBO);
 
     /**
-     * 更新配置文件
+     * Updates an existing configuration.
+     * This method updates the details of an existing configuration based on the provided data.
      *
-     * @param configBO 配置参数
-     * @return Result
+     * @param configBO The configuration object containing the updated data.
+     * @return A Result object indicating the outcome of the operation.
      */
     Result<Void> updateConfig(ConfigBO configBO);
 
     /**
-     * 更新配置文件
+     * Deletes a configuration by its ID.
+     * This method removes a configuration from the system based on its unique identifier.
      *
-     * @param id 配置id
-     * @return Result
+     * @param id The unique identifier of the configuration to be deleted.
+     * @return A Result object indicating the outcome of the operation.
      */
     Result<Void> delConfig(long id);
 
     /**
-     * 获取所有配置文件
+     * Retrieves all valid configurations.
+     * This method fetches a list of all configurations that are currently valid and active.
      *
-     * @return Result
+     * @return A Result object containing a list of ConfigBO objects representing the valid configurations.
      */
     Result<List<ConfigBO>> getAllValidConfig();
 
     /**
-     * 监听配置变动
+     * Listens for configuration changes.
+     * This method is responsible for handling long polling requests to detect configuration changes.
      *
-     * @param configPolingTask 配置轮询任务
+     * @param configPolingTask The polling task containing the details of the request for configuration changes.
      */
     void configListener(ConfigPolingTask configPolingTask);
 
     /**
-     * 配置变动后处理对应任务
+     * Handles tasks after a configuration change event.
+     * This method is called to process any necessary actions after a configuration has been changed.
      *
-     * @param configId 配置id
+     * @param configId The unique identifier of the configuration that has changed.
      */
     void onChangeConfigEvent(long configId);
 }

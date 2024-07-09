@@ -27,26 +27,30 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ConfigCenterClient {
 
+    // Constant for the property source name
     public static final String PROPERTY_SOURCE_NAME = "configCenter";
+    // Singleton instance of ConfigCenterClient
     private static volatile ConfigCenterClient client;
-    /**
-     * 服务端地址
-     */
+    // Server URL
     private final String url;
-    //配置map
+    // Map to store configurations with their IDs
     private final Map<Long, ConfigBO> configMap;
+    // List of beans to be refreshed
     private final List<Object> refreshBeanList;
+    // List of fields and their new values for refresh
     private final List<RefreshFieldValueBO> refreshFieldValueList;
 
+    // Private constructor to initialize the client
     private ConfigCenterClient(String url) {
         this.url = url;
         this.refreshBeanList = new ArrayList<>();
         this.refreshFieldValueList = new ArrayList<>();
-        //将配置中心的配置转换成property格式，即user.name=xxx
+        // Converts configuration from the config center to properties format
         List<ConfigVO> configList = getAllValidConfig();
         this.configMap = configList2ConfigMap(configList);
     }
 
+    // Singleton pattern to get the instance of ConfigCenterClient
     public static ConfigCenterClient getInstance(String url) {
         return Optional.ofNullable(client).orElseGet(() -> {
             synchronized (ConfigCenterClient.class) {
@@ -58,31 +62,36 @@ public class ConfigCenterClient {
         });
     }
 
+    // Retrieves all valid configurations from the server
     public List<ConfigVO> getAllValidConfig() {
         HttpRespBO httpRespBO = HttpUtil.httpGet(url + "/config/get");
         return httpResp2ConfigVOList(httpRespBO);
     }
 
+    // Adds a field to be refreshed for a specific configuration key
     public void addRefreshField(String key, RefreshFieldBO refreshFieldBO) {
         configMap.values().stream().map(ConfigBO::getConfigDataList).filter(Objects::nonNull)
                 .flatMap(List::stream).filter(configDataBO -> configDataBO.getKey().equals(key))
                 .findFirst().ifPresent(configDataBO -> configDataBO.addRefreshField(refreshFieldBO));
     }
 
+    // Adds a new value for a specific field to be refreshed
     public void addRefreshFieldValue(Object bean, Field field, String value) {
         refreshFieldValueList.add(new RefreshFieldValueBO(bean, field, value));
     }
 
+    // Adds a bean to the list of beans to be refreshed
     public void addRefreshBeanList(Object bean) {
         refreshBeanList.add(bean);
     }
 
-
+    // Retrieves the current configuration properties
     public Map<String, Object> getConfigProperty() {
         return configMap.values().stream().map(ConfigBO::getConfigDataList).filter(Objects::nonNull)
                 .flatMap(List::stream).collect(Collectors.toMap(ConfigDataBO::getKey, ConfigDataBO::getValue, (k1, k2) -> k1));
     }
 
+    // Starts short polling for configuration changes
     public void startShortPolling() {
         polling("/config/change/get", () -> {
             try {
@@ -93,10 +102,12 @@ public class ConfigCenterClient {
         }, 2000);
     }
 
+    // Starts long polling for configuration changes
     public void startLongPolling() {
         polling("/config/change/get/long", null, 30000);
     }
 
+    // Generic polling method for both short and long polling
     public void polling(String uri, Runnable runnable, int readTimeout) {
         Thread thread = new Thread(() -> {
             while (!Thread.interrupted()) {
@@ -161,6 +172,7 @@ public class ConfigCenterClient {
         thread.start();
     }
 
+    // Starts long polling specifically designed for Spring Boot applications
     public void startSpringBootLongPolling(ConfigurableEnvironment environment, ConfigurableBeanFactory beanFactory) {
         if (configMap.isEmpty() || refreshFieldValueList.isEmpty()) {
             log.info("configMap.size:{} refreshFieldValueList.size:{}", configMap.size(), refreshFieldValueList.size());
@@ -254,17 +266,33 @@ public class ConfigCenterClient {
         }).collect(Collectors.toMap(ConfigBO::getId, Function.identity(), (k1, k2) -> k1))).orElseGet(HashMap::new);
     }
 
+    /**
+     * Converts an HTTP response into a list of ConfigVO objects.
+     * This method first checks if the HTTP response indicates success (status code 200) and if the body is not null.
+     * It then parses the body into a Result object to check if the operation was successful.
+     * Finally, it converts the data part of the Result object into a list of ConfigVO objects.
+     *
+     * @param httpRespBO The HTTP response object to be converted.
+     * @return A list of ConfigVO objects extracted from the HTTP response.
+     * @throws IllegalArgumentException If the HTTP response indicates failure or if the body is null.
+     */
     private List<ConfigVO> httpResp2ConfigVOList(HttpRespBO httpRespBO) {
+        // Check if the HTTP response is successful (status code 200)
         if (!httpRespBO.success()) {
-            throw new IllegalArgumentException("获取配置失败：code:" + httpRespBO.getCode() + ",msg:" + httpRespBO.getMessage());
+            throw new IllegalArgumentException("Failed to get configuration: code:" + httpRespBO.getCode() + ",msg:" + httpRespBO.getMessage());
         }
+        // Check if the HTTP response body is null
         if (httpRespBO.getBody() == null) {
-            throw new IllegalArgumentException("获取配置失败 body is null：code:" + httpRespBO.getCode() + ",msg:" + httpRespBO.getMessage());
+            throw new IllegalArgumentException("Failed to get configuration, body is null: code:" + httpRespBO.getCode() + ",msg:" + httpRespBO.getMessage());
         }
+        // Parse the HTTP response body into a Result object
         Result<?> result = JSON.parseObject(new String(httpRespBO.getBody(), StandardCharsets.UTF_8), Result.class);
+        // Check if the operation indicated by the Result object was unsuccessful
         if (result.failed()) {
-            throw new IllegalArgumentException("获取配置失败 result:" + result);
+            return new ArrayList<>();
         }
+        // Convert the data part of the Result object into a list of ConfigVO objects and return it
         return JSON.parseArray(JSON.toJSONString(result.getData()), ConfigVO.class);
+
     }
 }

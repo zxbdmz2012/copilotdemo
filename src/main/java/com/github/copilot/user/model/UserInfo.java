@@ -4,9 +4,7 @@ import lombok.*;
 
 import java.util.List;
 
-/**
- * 用户实体
- */
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

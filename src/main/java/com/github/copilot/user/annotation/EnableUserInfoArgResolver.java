@@ -9,7 +9,14 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 在启动类上添加该注解来----开启自动登录用户对象注入
+ * Annotation to enable automatic injection of user information into controller methods.
+ * When applied to a Spring Boot application's main class, this annotation activates
+ * the configuration that supports resolving and injecting user information based on the
+ * current session or request context. It leverages the {@link LoginArgResolverConfig} class
+ * to configure necessary beans and argument resolvers for handling user information.
+ *
+ * Usage of this annotation simplifies the process of accessing user information in
+ * controller methods, promoting cleaner and more maintainable code.
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)

@@ -13,13 +13,23 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-
+/**
+ * Utility class for operations related to iText, a library for creating and manipulating PDFs.
+ * This class provides methods to convert Apache POI border styles to iText borders,
+ * create fonts for PDF documents, and create cells with specific styles and content for PDF tables.
+ */
 public class ITextUtil {
 
+    /**
+     * Maps Apache POI border styles to iText border objects.
+     * This allows for consistent border styles between POI-generated spreadsheets and iText-generated PDFs.
+     */
     public static final Map<Short, Border> POI_TO_ITEXT_BORDER = new HashMap<>();
-    // iText7下的空格用此来代替，因为" "会被截掉
-    // 不间断空格\u00a0,主要用在office中,让一个单词在结尾处不会换行显示,快捷键ctrl+shift+space
-    // 本来\u00a0的正常表现是半角空格的宽度，但在Itext7中表现出来的是全角空格的宽度
+    /**
+     * Represents a non-breaking space character in iText.
+     * This is used to prevent cell content from being trimmed or altered in layout,
+     * ensuring that spaces are preserved in the PDF output.
+     */
     public static final String BLANK = "\u00a0";
 
     static {
@@ -40,13 +50,30 @@ public class ITextUtil {
 
     }
 
+    /**
+     * Creates a PdfFont object from a font file.
+     * This method allows for custom fonts to be used in the generated PDF documents.
+     *
+     * @param path The path to the font file.
+     * @return A PdfFont object representing the font.
+     * @throws IOException If there is an error reading the font file.
+     */
     public static PdfFont createFont(String path) throws IOException {
         return PdfFontFactory.createFont(path, PdfEncodings.IDENTITY_H);
     }
 
+    /**
+     * Creates a cell for a PDF table with specified rowspan, colspan, text content, and font.
+     * This method allows for detailed customization of table cells in the PDF.
+     *
+     * @param rowspan The number of rows the cell should span.
+     * @param colspan The number of columns the cell should span.
+     * @param text The text content of the cell.
+     * @param font The font to be used for the text content.
+     * @return A Cell object ready to be added to a PDF table.
+     */
     public static Cell cell(int rowspan, int colspan, String text, PdfFont font) {
         if (text == null) {
-            // 防止单元格高度坍塌
             text = BLANK;
         }
         final Paragraph paragraph = new Paragraph(text);

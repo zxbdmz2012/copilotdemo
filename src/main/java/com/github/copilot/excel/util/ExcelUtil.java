@@ -12,8 +12,17 @@ import org.apache.poi.xssf.usermodel.XSSFFont;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * Utility class for Excel-related operations.
+ * Provides methods for manipulating and extracting information from Excel cells, rows, and sheets.
+ */
 public class ExcelUtil {
+    /**
+     * Retrieves the cell directly above the current cell.
+     *
+     * @param cell The current cell.
+     * @return The cell above the current cell, or null if it's the first row.
+     */
     public static Cell getAboveCell(Cell cell) {
         final int rowIndex = cell.getRowIndex();
         final int columnIndex = cell.getColumnIndex();
@@ -21,6 +30,14 @@ public class ExcelUtil {
         return getAboveCell(rowIndex, columnIndex, sheet);
     }
 
+    /**
+     * Retrieves the cell above a specified position in a sheet.
+     *
+     * @param rowIndex    The row index of the current cell.
+     * @param columnIndex The column index of the current cell.
+     * @param sheet       The sheet containing the cell.
+     * @return The cell above the specified position, or null if it's the first row.
+     */
     public static Cell getAboveCell(int rowIndex, int columnIndex, Sheet sheet) {
         if (rowIndex <= 0) {
             return null;
@@ -33,6 +50,12 @@ public class ExcelUtil {
         return aboveRowCell;
     }
 
+    /**
+     * Retrieves the cell to the left of the current cell.
+     *
+     * @param cell The current cell.
+     * @return The cell to the left of the current cell, or null if it's the first column.
+     */
     public static Cell getLeftCell(Cell cell) {
         final int columnIndex = cell.getColumnIndex();
         if (columnIndex <= 0) {
@@ -43,10 +66,10 @@ public class ExcelUtil {
     }
 
     /**
-     * 找到最大行，并获取各列宽百分比值
+     * Finds the row with the maximum number of cells and calculates the width percentages of each column.
      *
-     * @param sheet
-     * @return
+     * @param sheet The sheet to analyze.
+     * @return An array of UnitValue representing the width percentages of each column.
      */
     public static UnitValue[] findMaxRowColWidths(Sheet sheet) {
         Row maxRow = null;
@@ -74,11 +97,10 @@ public class ExcelUtil {
     }
 
     /**
-     * ARGB 十六进制形式 转 数值形式
-     * "FFD0CECE" -> [255, 208, 206, 206]
+     * Converts an ARGB hex string to an array of integers representing the alpha, red, green, and blue components.
      *
-     * @param argbHex
-     * @return
+     * @param argbHex The ARGB hex string.
+     * @return An array of integers representing the ARGB components.
      */
     public static int[] argbHex2argb(String argbHex) {
         String aHex = argbHex.substring(0, 2);
@@ -91,6 +113,8 @@ public class ExcelUtil {
         int b2 = Integer.parseInt(bHex, 16);
         return new int[]{a2, r2, g2, b2};
     }
+
+
 
     public static int[] getColorARGB(Color color) {
         if (color == null) {
@@ -162,19 +186,19 @@ public class ExcelUtil {
         return result;
     }
 
+
+
     /**
-     * 获取合并单元格集合
+     * Retrieves a list of all merged cell ranges within a given sheet.
+     * This method iterates through all merged regions in the sheet and adds them to a list.
      *
-     * @param sheet
-     * @return
+     * @param sheet The sheet from which to retrieve merged cell ranges.
+     * @return A list of CellRangeAddress objects representing all merged regions in the sheet.
      */
     public static List<CellRangeAddress> getCombineCellList(Sheet sheet) {
         List<CellRangeAddress> list = new ArrayList<>();
-        //获得一个 sheet 中合并单元格的数量
         int sheetMergerCount = sheet.getNumMergedRegions();
-        //遍历所有的合并单元格
         for (int i = 0; i < sheetMergerCount; i++) {
-            //获得合并单元格保存进list中
             CellRangeAddress ca = sheet.getMergedRegion(i);
             list.add(ca);
         }
@@ -182,12 +206,12 @@ public class ExcelUtil {
     }
 
     /**
-     * 获取cell的合并单元格信息
-     * 若cell不是合并单元格，返回null
+     * Determines if a given cell is part of any merged cell range in the list and returns that range.
+     * This method checks each merged cell range in the provided list to see if the given cell is within that range.
      *
-     * @param combineCellList
-     * @param cell
-     * @return
+     * @param combineCellList A list of CellRangeAddress objects representing merged cell ranges.
+     * @param cell The cell to check against the list of merged cell ranges.
+     * @return The CellRangeAddress that includes the cell, or null if the cell is not part of any merged range.
      */
     public static CellRangeAddress getCombineCellRangeAddress(List<CellRangeAddress> combineCellList, Cell cell) {
         for (CellRangeAddress ca : combineCellList) {
@@ -199,11 +223,13 @@ public class ExcelUtil {
     }
 
     /**
-     * 是否是合并单元格中的第一个单元格
+     * Checks if the specified cell is the first cell in its merged cell range.
+     * This method compares the cell's row and column indices to the first row and column indices of the cell range.
+     * It returns true if the cell is the top-left cell in the merged range, indicating it is the first cell.
      *
-     * @param cellRangeAddress
-     * @param cell
-     * @return
+     * @param cellRangeAddress The CellRangeAddress representing the merged cell range to check.
+     * @param cell The cell to check if it is the first cell in the merged range.
+     * @return true if the cell is the first cell in the merged range, false otherwise.
      */
     public static boolean isFirstInCombineCell(CellRangeAddress cellRangeAddress, Cell cell) {
         if (cellRangeAddress == null) {
@@ -285,11 +311,6 @@ public class ExcelUtil {
 
 
     public static String doubleCoverToString(double value) {
-        if (value == (int) value) {
-            // 如果小数部分为零，则不保留小数
-            return String.valueOf((int) value);
-        }
-        // 如果有小数部分，则保留小数
         return String.valueOf(value);
     }
 

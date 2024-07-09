@@ -6,18 +6,20 @@ import lombok.NoArgsConstructor;
 
 import java.lang.reflect.Field;
 
-
+/**
+ * Represents a field within a bean that should be refreshed when the configuration changes.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class RefreshFieldBO {
     /**
-     * 对象实例
+     * The bean instance containing the field to be refreshed.
      */
     private Object bean;
 
     /**
-     * 字段
+     * The field within the bean that should be refreshed.
      */
     private Field field;
 }

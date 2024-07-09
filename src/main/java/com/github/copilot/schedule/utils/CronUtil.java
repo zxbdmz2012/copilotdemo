@@ -15,40 +15,14 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-/**
- * 字段 允许值 允许的特殊字符
- * 秒 0-59 , - * /
- * 分 0-59 , - * /
- * 小时 0-23 , - * /
- * 日期 1-31 , - * ? / L W C
- * 月份 1-12 或者 JAN-DEC , - * /
- * 星期 1-7 或者 SUN-SAT , - * ? / L C #
- * 年（可选） 留空, 1970-2099 , - * /
- * <p>
- * * 表示所有值；
- * ? 表示未说明的值，即不关心它为何值；
- * - 表示一个指定的范围；
- * , 表示附加一个可能值；
- * / 符号前表示开始时间，符号后表示每次递增的值；
- * L("last") ("last") "L" 用在day-of-month字段意思是 "这个月最后一天"；用在 day-of-week字段, 它简单意思是 "7" or "SAT"。 如果在day-of-week字段里和数字联合使用，它的意思就是 "这个月的最后一个星期几" – 例如： "6L" means "这个月的最后一个星期五". 当我们用“L”时，不指明一个列表值或者范围是很重要的，不然的话，我们会得到一些意想不到的结果。
- * W("weekday") 只能用在day-of-month字段。用来描叙最接近指定天的工作日（周一到周五）。例如：在day-of-month字段用“15W”指“最接近这个 月第15天的工作日”，即如果这个月第15天是周六，那么触发器将会在这个月第14天即周五触发；如果这个月第15天是周日，那么触发器将会在这个月第 16天即周一触发；如果这个月第15天是周二，那么就在触发器这天触发。注意一点：这个用法只会在当前月计算值，不会越过当前月。“W”字符仅能在 day-of-month指明一天，不能是一个范围或列表。也可以用“LW”来指定这个月的最后一个工作日。
- * # 只能用在day-of-week字段。用来指定这个月的第几个周几。例：在day-of-week字段用"6#3"指这个月第3个周五（6指周五，3指第3个）。如果指定的日期不存在，触发器就不会触发。
- * C 指和calendar联系后计算过的值。例：在day-of-month 字段用“5C”指在这个月第5天或之后包括calendar的第一天；在day-of-week字段用“1C”指在这周日或之后包括calendar的第一天。
- */
+
 public class CronUtil {
 
-    /**
-     * 计算表达式最近几次执行时间
-     *
-     * @param cronExpress 表达式
-     * @param num         次数
-     * @return 时间集合
-     */
+
     public static List<String> getCronNextTimes(String cronExpress, Integer num) {
         if (StringUtil.isEmpty(cronExpress)) {
             throw new RuntimeException("cron 表达式不能为空");
         }
-        //判断cron表达式
         if (!CronSequenceGenerator.isValidExpression(cronExpress)) {
             throw new RuntimeException("cron 表达式格式不正确,cron: " + cronExpress);
         }
@@ -70,13 +44,7 @@ public class CronUtil {
         return list;
     }
 
-    /**
-     * 构建Cron表达式
-     * 目前支持三种常用的cron表达式
-     * 1.每天的某个时间点执行 例:12 12 12 * * 表示每天12时12分12秒执行
-     * 2.每周的哪几天执行    例:12 12 12 ? * 1,2,3表示每周的周1周2周3 ,12时12分12秒执行
-     * 3.每月的哪几天执行    例:12 12 12 1,21,13 * ?表示每月的1号21号13号 12时12分12秒执行
-     */
+
     public static String createCronExpression(CronModel cronModel) {
         StringBuilder cronExp = new StringBuilder();
 

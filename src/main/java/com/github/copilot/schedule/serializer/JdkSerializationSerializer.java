@@ -2,9 +2,7 @@ package com.github.copilot.schedule.serializer;
 
 import java.io.*;
 
-/**
- * jdk序列化实现类
- */
+
 public class JdkSerializationSerializer<T> implements ObjectSerializer<T> {
 
     @Override

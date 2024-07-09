@@ -5,32 +5,41 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
-
+/**
+ * Business Object class for configuration data.
+ * This class is used to transfer configuration data within the application layers,
+ * encapsulating the configuration details fetched from or to be persisted in the database.
+ */
 @Data
 public class ConfigBO {
 
     /**
-     * 配置id
+     * Unique identifier for the configuration.
+     * This corresponds to the primary key in the database.
      */
     private long id;
 
     /**
-     * 配置名
+     * Name of the configuration.
+     * This is used to identify the configuration and is expected to be unique.
      */
     private String name;
 
     /**
-     * 配置版本号
+     * Version number of the configuration.
+     * Used for optimistic locking and to manage concurrent updates to the same configuration.
      */
     private int version;
 
     /**
-     * 配置内容
+     * The actual data of the configuration stored in JSON format.
+     * This allows for flexible and structured storage of configuration parameters.
      */
     private JSONObject configData;
 
     /**
-     * 创建时间
+     * Timestamp indicating when the configuration was created.
+     * Helps in tracking the age of the configuration and potentially in audit processes.
      */
     private LocalDateTime createTime;
 }

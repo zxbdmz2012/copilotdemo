@@ -1,18 +1,21 @@
 package com.github.copilot.schedule.enums;
 
-
 import lombok.Getter;
 
+/**
+ * Enum for representing commands related to task notifications.
+ * This enum defines various commands that can be sent to notify about task operations.
+ */
 @Getter
 public enum NotifyCmd {
 
-    //没有通知，默认状态
+    // Represents the default state with no notification.
     NO_NOTIFY(0),
-    //开启任务(Task)
+    // Represents a command to start a task.
     START_TASK(1),
-    //修改任务(Task)
+    // Represents a command to edit a task.
     EDIT_TASK(2),
-    //停止任务(Task)
+    // Represents a command to stop a task.
     STOP_TASK(3);
 
     int id;
@@ -33,5 +36,4 @@ public enum NotifyCmd {
                 return NO_NOTIFY;
         }
     }
-
 }

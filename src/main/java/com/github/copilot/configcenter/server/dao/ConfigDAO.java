@@ -1,46 +1,46 @@
 package com.github.copilot.configcenter.server.dao;
 
-
 import com.github.copilot.configcenter.entity.ConfigDO;
-
 import java.util.List;
 
+/**
+ * Interface for data access operations related to {@link ConfigDO} entities.
+ */
 public interface ConfigDAO {
     /**
-     * 新增配置
+     * Inserts a new {@link ConfigDO} into the database.
      *
-     * @param configDO 配置对象
-     * @return 配置id
+     * @param configDO The configuration object to be inserted.
+     * @return The generated ID for the inserted configuration.
      */
     long insertConfigDO(ConfigDO configDO);
 
     /**
-     * 更新配置
+     * Updates an existing {@link ConfigDO} in the database.
      *
-     * @param configDO 配置对象
+     * @param configDO The configuration object with updated fields.
      */
     void updateConfig(ConfigDO configDO);
 
     /**
-     * 删除配置
+     * Deletes a {@link ConfigDO} from the database by its ID.
      *
-     * @param id 配置id
+     * @param id The ID of the configuration to be deleted.
      */
     void delConfig(long id);
 
     /**
-     * 获取配置
+     * Retrieves a {@link ConfigDO} from the database by its ID.
      *
-     * @param id 配置id
-     * @return 配置对象
+     * @param id The ID of the configuration to retrieve.
+     * @return The retrieved configuration object, or {@code null} if not found.
      */
     ConfigDO getConfig(long id);
 
-
     /**
-     * 获取全部配置
+     * Retrieves all {@link ConfigDO} entities from the database.
      *
-     * @return 配置对象
+     * @return A list of all configuration objects.
      */
     List<ConfigDO> getAllConfig();
 }

@@ -40,81 +40,51 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 
+/**
+ * The Excel2PDF class provides functionality to convert Excel files into PDF format.
+ * It supports processing both .xls and .xlsx files and allows for customization of the resulting PDF document.
+ * This includes setting custom fonts, handling merged cells, and embedding images from the Excel file into the PDF.
+ * The class utilizes the Apache POI library for Excel file manipulation and the iText library for PDF generation.
+ *
+ * Key functionalities include:
+ * - Converting an entire Excel workbook or specific sheets into a PDF document.
+ * - Customizing PDF document properties such as column widths and fonts.
+ * - Supporting merged cells and ensuring they are properly represented in the PDF.
+ * - Embedding Excel sheet images into the PDF document.
+ * - Providing callbacks for further customization of the PDF document after its creation.
+ */
 @Slf4j
 public class Excel2PDF {
 
     public static String DEFAULT_FONT_PATH = "fonts/arial.ttf";
 
-    /**
-     * Excel 转 PDF
-     *
-     * @param is Excel文件 输入流
-     * @param os PDF文件 输出流
-     * @throws IOException
-     */
+
     public static void process(InputStream is, OutputStream os) throws IOException {
         process(is, os, null, null);
     }
 
-    /**
-     * Excel 转 PDF
-     *
-     * @param is               Excel文件 输入流
-     * @param os               PDF文件 输出流
-     * @param documentCallback document建立后的回调函数
-     * @throws IOException
-     */
+
     public static void process(InputStream is, OutputStream os, Consumer<Document> documentCallback) throws IOException {
         process(is, os, null, documentCallback);
     }
 
-    /**
-     * Excel 转 PDF
-     *
-     * @param is                Excel文件 输入流
-     * @param os                PDF文件 输出流
-     * @param columnWidthsArray 每个页的PDF表格列宽
-     * @param documentCallback  document建立后的回调函数
-     * @throws IOException
-     */
+
     public static void process(InputStream is, OutputStream os, UnitValue[][] columnWidthsArray, Consumer<Document> documentCallback) throws IOException {
         final Workbook workbook = WorkbookFactory.create(is);
         process(workbook, os, columnWidthsArray, documentCallback);
 
     }
 
-    /**
-     * Excel 转 PDF
-     *
-     * @param workbook POI Workbook 对象
-     * @param os       PDF文件 输出流
-     * @throws IOException
-     */
     public static void process(Workbook workbook, OutputStream os) throws IOException {
         process(workbook, os, null, null);
     }
 
-    /**
-     * Excel 转 PDF
-     *
-     * @param workbook         POI Workbook 对象
-     * @param os               PDF文件 输出流
-     * @param documentCallback document建立后的回调函数
-     * @throws IOException
-     */
+
     public static void process(Workbook workbook, OutputStream os, Consumer<Document> documentCallback) throws IOException {
         process(workbook, os, null, documentCallback);
     }
 
-    /**
-     * Excel 转 PDF
-     *
-     * @param workbook          POI Workbook 对象
-     * @param os                PDF文件 输出流
-     * @param columnWidthsArray 每个页的PDF表格列宽
-     * @param documentCallback  document建立后的回调函数
-     * @throws IOException
-     */
+
     private static void process(Workbook workbook, OutputStream os, UnitValue[][] columnWidthsArray, Consumer<Document> documentCallback) throws IOException {
 
         File fontFile = null;
@@ -143,7 +113,6 @@ public class Excel2PDF {
         for (int sheetIdx = 0; sheetIdx < workbook.getNumberOfSheets(); sheetIdx++) {
             final Sheet sheet = workbook.getSheetAt(sheetIdx);
             if (sheetIdx > 0) {
-                // 下一页
                 document.add(new AreaBreak(AreaBreakType.NEXT_PAGE));
             }
             UnitValue[] columnWidths = null;
@@ -156,15 +125,7 @@ public class Excel2PDF {
         document.close();
     }
 
-    /**
-     * 渲染一个sheet的内容为表格输出到PDF的document中
-     *
-     * @param columnWidths PDF表格列宽，为null则自动计算
-     * @param document     PDF的document
-     * @param sheet        Excel的sheet
-     * @param fontCache
-     * @throws IOException
-     */
+
     private static void renderSheet(UnitValue[] columnWidths, Document document, Sheet sheet, Map<String, PdfFont> fontCache) throws IOException {
         final Workbook workbook = sheet.getWorkbook();
         if (columnWidths == null) {
@@ -251,8 +212,6 @@ public class Excel2PDF {
                 continue;
             }
             final ClientAnchor clientAnchor = picture.getClientAnchor();
-            // final int row = clientAnchor.getRow1();
-            // 在合并单元格中，poi认为内容单元格是左上角的单元格，而itext认为是左下角的单元格，所以取row2
             final int row = clientAnchor.getRow2();
             final Position pos = new Position(clientAnchor.getCol1(), row);
             pos2picture.put(pos, picture);

@@ -8,6 +8,13 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
 
+/**
+ * Configuration class for EasyJob scheduling tasks.
+ * This class holds the configuration properties for the EasyJob scheduler, including node identification,
+ * task fetching strategies, thread pool configurations, and heartbeat settings. These configurations
+ * are loaded from application properties and can be overridden by specifying them in the application's
+ * configuration file.
+ */
 @Component
 @Data
 public class EasyJobConfig {
@@ -15,68 +22,71 @@ public class EasyJobConfig {
     private String nodeId;
 
     /**
-     * 节点取任务的策略
+     * Strategy for how nodes fetch tasks. Can be overridden in application properties.
      */
     @Value("${easyjob.node.strategy:default}")
     private String nodeStrategy;
 
     /**
-     * 节点取任务的周期，单位是毫秒，默认100毫秒
+     * The period in milliseconds for how often nodes fetch tasks. Default is 100ms.
      */
     @Value("${easyjob.node.fetchPeriod:100}")
     private int fetchPeriod;
 
     /**
-     * 节点取任务据当前的时间段，比如每次取还有5分钟开始的任务，这里单位是秒
+     * The duration in seconds for fetching tasks ahead of their scheduled time. Default is 300 seconds (5 minutes).
      */
     @Value("${easyjob.node.fetchDuration:300}")
     private int fetchDuration;
 
     /**
-     * 线程池中队列大小
+     * The size of the queue in the thread pool. Default is 1000.
      */
     @Value("${easyjob.pool.queueSize:1000}")
     private int queueSize;
 
     /**
-     * 线程池中初始线程数量
+     * The initial number of threads in the thread pool. Default is 5.
      */
     @Value("${easyjob.pool.coreSize:5}")
     private int corePoolSize;
 
     /**
-     * 线程池中最大线程数量
+     * The maximum number of threads in the thread pool. Default is 10.
      */
     @Value("${easyjob.pool.maxSize:10}")
     private int maxPoolSize;
 
     /**
-     * 节点心跳周期，单位秒
+     * The period in seconds for node heartbeat signals. Default is 20 seconds.
      */
     @Value("${easyjob.heartBeat.seconds:20}")
     private int heartBeatSeconds;
 
     /**
-     * 节点心跳开关，默认开
+     * Whether the node heartbeat mechanism is enabled. Default is true.
      */
     @Value("${easyjob.heartBeat.enable:true}")
     private boolean heartBeatEnable;
 
     /**
-     * 恢复线程开关，默认开
+     * Whether the recovery mechanism is enabled for handling failed tasks. Default is true.
      */
     @Value("${easyjob.recover.enable:true}")
     private boolean recoverEnable;
 
     /**
-     * 恢复线程周期，默认60s
+     * The period in seconds for the recovery mechanism to run. Default is 60 seconds.
      */
     @Value("${easyjob.recover.seconds:60}")
     private int recoverSeconds;
 
-
-
-
+    /**
+     * Retrieves the node ID, which is the local IP address of the machine. If the IP address cannot be determined,
+     * it logs an error and returns "unknown".
+     *
+     * @return The node ID as a string.
+     */
     public String getNodeId() {
         try {
             return InetAddress.getLocalHost().getHostAddress();
@@ -86,10 +96,9 @@ public class EasyJobConfig {
             return "unknown";
         }
     }
+
     /**
-     * 系统启动时间
+     * The system start time, used for monitoring and possibly for recovery mechanisms.
      */
     private Date sysStartTime;
-
-
 }
