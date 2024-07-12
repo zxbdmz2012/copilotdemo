@@ -1,7 +1,7 @@
 package com.github.copilot.util;
 
 
-import com.github.copilot.schedule.enums.TimeZoneEnum;
+import com.github.copilot.task.enums.TimeZoneEnum;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;

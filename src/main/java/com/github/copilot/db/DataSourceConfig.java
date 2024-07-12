@@ -72,11 +72,6 @@ public class DataSourceConfig {
         return new JpaTransactionManager(entityManagerFactory);
     }
 
-    @Bean(name = "commonJdbcTemplate")
-    public JdbcTemplate jdbcTemplate(@Qualifier("commonDataSource") DataSource dataSource) {
-        return new JdbcTemplate(dataSource);
-    }
-
     @Bean
     public AuditorAware<String> auditorProvider() {
         // Implement the AuditorAware interface to return the current auditor

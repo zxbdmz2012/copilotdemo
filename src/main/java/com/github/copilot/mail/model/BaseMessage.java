@@ -40,6 +40,16 @@ public class BaseMessage implements Serializable {
      */
     private String attachFlag;
 
+    private boolean html = true;
+
+    public boolean isHtml() {
+        return html;
+    }
+
+    public void setHtml(boolean html) {
+        this.html = html;
+    }
+
     /**
      * 附件类型
      */

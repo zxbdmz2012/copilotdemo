@@ -46,7 +46,7 @@ public class RPCClientProxy implements InvocationHandler {
             }
         }
 
-        // If no URL was found, throw an exception
+        // If no URL was found, throw an exceptionhandler
         if (url == null) {
             throw new RuntimeException("No url found for method: " + method.getName());
         }

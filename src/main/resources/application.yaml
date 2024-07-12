@@ -2,6 +2,8 @@ config:
   center:
     url: http://localhost:8080
 spring:
+  main:
+    allow-bean-definition-overriding: true
   datasource:
     name: test
     url: jdbc:oracle:thin:@//localhost:1521/helowin
