@@ -3,7 +3,7 @@ config:
     url: http://localhost:8080
 spring:
   main:
-    allow-bean-definition-overriding: true
+    allow-circular-references: true
   mail:
     host: smtp.test.com
     username: userId
