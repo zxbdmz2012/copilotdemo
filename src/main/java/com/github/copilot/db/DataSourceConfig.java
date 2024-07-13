@@ -33,8 +33,7 @@ import java.util.Optional;
         transactionManagerRef = "commonTransactionManager")
 public class DataSourceConfig {
 
-    @Autowired
-    private PasswordDecryptor passwordDecryptor;
+
     @Autowired
     private DataBaseProperties dataBaseProperties;
 
@@ -43,7 +42,7 @@ public class DataSourceConfig {
         return DataSourceBuilder.create()
                 .url(dataBaseProperties.getUrl())
                 .username(dataBaseProperties.getUsername())
-                .password(passwordDecryptor.decrypt(dataBaseProperties.getPassword()))
+                .password((dataBaseProperties.getPassword()))
                 .driverClassName(dataBaseProperties.getDiverClassName())
                 .build();
     }
