@@ -4,15 +4,10 @@ config:
 spring:
   main:
     allow-bean-definition-overriding: true
-  datasource:
-    name: test
-    url: jdbc:oracle:thin:@//localhost:1521/helowin
-    username: system
-    password: helowin
-    driver-class-name: oracle.jdbc.OracleDriver
   mail:
     host: smtp.test.com
     username: userId
+
 userID:
   header: userId
 
@@ -37,16 +32,9 @@ easyjob:
     enable: true #节点异常状态恢复线程是否启用，依赖于心跳开关
     seconds: 30  #节点异常状态恢复线程每隔多少秒去处理失联节点的未完成任务，依赖于心跳开关
 
-server:
-  port: 8081
+server:8081
 services:
+  port:
   urls:
     service1: http://localhost:8080
     service2: http://localhost:8081
-  methods:
-    service1:
-      - method1
-      - method2
-    service2:
-      - method3
-      - method4
