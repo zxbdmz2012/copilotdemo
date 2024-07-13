@@ -1,15 +1,7 @@
 package com.github.copilot.task.utils;
 
-import com.github.copilot.task.enums.JobEnum;
 import com.github.copilot.task.model.CronModel;
 import com.github.copilot.util.ArrayUtil;
-import com.github.copilot.util.DateUtil;
-import com.github.copilot.util.StringUtil;
-import org.quartz.CronTrigger;
-import org.quartz.TriggerUtils;
-import org.springframework.scheduling.support.CronSequenceGenerator;
-
-import java.text.ParseException;
 import java.util.*;
 
 

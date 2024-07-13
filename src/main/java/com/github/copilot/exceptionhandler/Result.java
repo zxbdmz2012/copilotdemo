@@ -20,7 +20,7 @@ import java.io.Serializable;
  */
 @Getter
 @Setter
-public class R<T> implements Serializable {
+public class Result<T> implements Serializable {
 
     /**
      * Indicates whether the operation associated with the response was successful.
@@ -52,7 +52,7 @@ public class R<T> implements Serializable {
     /**
      * Default constructor.
      */
-    public R() {
+    public Result() {
     }
 
     /**
@@ -64,7 +64,7 @@ public class R<T> implements Serializable {
      * @param code The error code associated with the response.
      * @param msg  The detailed message about the response.
      */
-    public R(Boolean succ, Long id, T data, String code, String msg) {
+    public Result(Boolean succ, Long id, T data, String code, String msg) {
         this.succ = succ;
         this.id = id;
         this.data = data;
@@ -77,10 +77,10 @@ public class R<T> implements Serializable {
      *
      * @return A new R instance representing a successful operation.
      */
-    public static R ofSuccess() {
-        R r = new R();
-        r.succ = true;
-        return r;
+    public static Result ofSuccess() {
+        Result result = new Result();
+        result.succ = true;
+        return result;
     }
 
     /**
@@ -89,11 +89,11 @@ public class R<T> implements Serializable {
      * @param data The data to include in the success response.
      * @return A new R instance representing a successful operation with data.
      */
-    public static R ofSuccess(Object data) {
-        R r = new R();
-        r.succ = true;
-        r.setData(data);
-        return r;
+    public static Result ofSuccess(Object data) {
+        Result result = new Result();
+        result.succ = true;
+        result.setData(data);
+        return result;
     }
 
     /**
@@ -104,13 +104,13 @@ public class R<T> implements Serializable {
      * @param id   The unique identifier for the response.
      * @return A new R instance representing a failed operation.
      */
-    public static R ofFail(String code, String msg, Long id) {
-        R r = new R();
-        r.succ = false;
-        r.code = code;
-        r.msg = msg;
-        r.id = id;
-        return r;
+    public static Result ofFail(String code, String msg, Long id) {
+        Result result = new Result();
+        result.succ = false;
+        result.code = code;
+        result.msg = msg;
+        result.id = id;
+        return result;
     }
 
     /**
@@ -122,14 +122,14 @@ public class R<T> implements Serializable {
      * @param id   The unique identifier for the response.
      * @return A new R instance representing a failed operation with data.
      */
-    public static R ofFail(String code, String msg, Object data, Long id) {
-        R r = new R();
-        r.succ = false;
-        r.code = code;
-        r.msg = msg;
-        r.setData(data);
-        r.id = id;
-        return r;
+    public static Result ofFail(String code, String msg, Object data, Long id) {
+        Result result = new Result();
+        result.succ = false;
+        result.code = code;
+        result.msg = msg;
+        result.setData(data);
+        result.id = id;
+        return result;
     }
 
     /**
@@ -139,13 +139,13 @@ public class R<T> implements Serializable {
      * @param id         The unique identifier for the response.
      * @return A new R instance representing a failed operation based on a common error code.
      */
-    public static R ofFail(CommonErrorCode resultEnum, Long id) {
-        R r = new R();
-        r.id = id;
-        r.succ = false;
-        r.code = resultEnum.getCode();
-        r.msg = resultEnum.getMessage();
-        return r;
+    public static Result ofFail(CommonErrorCode resultEnum, Long id) {
+        Result result = new Result();
+        result.id = id;
+        result.succ = false;
+        result.code = resultEnum.getCode();
+        result.msg = resultEnum.getMessage();
+        return result;
     }
 
     // Getters and setters omitted for brevity

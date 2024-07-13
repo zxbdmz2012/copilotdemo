@@ -3,8 +3,11 @@ package com.github.copilot.task.repository;
 import com.github.copilot.task.entity.Task;
 import com.github.copilot.task.enums.TaskStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,6 +20,7 @@ import java.util.List;
  * and finding tasks by multiple statuses and their last update time.
  */
 @Repository
+@Transactional
 public interface TaskJpaRepository extends JpaRepository<Task, Long> {
     /**
      * Finds a task by its name.
@@ -42,7 +46,9 @@ public interface TaskJpaRepository extends JpaRepository<Task, Long> {
      * @param nodeId The ID of the node whose tasks are to be updated.
      * @return The number of tasks updated.
      */
-    int updateTaskStatusByNodeId(TaskStatus taskStatus, String nodeId);
+    @Modifying
+    @Query("update Task t set t.status = ?1 where t.nodeId = ?2")
+    int updateStatusByNodeId(TaskStatus taskStatus, String nodeId);
 
     /**
      * Finds tasks that are in any of the specified statuses and were last updated before a given time.

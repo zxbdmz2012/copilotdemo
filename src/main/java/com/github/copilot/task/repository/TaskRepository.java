@@ -224,7 +224,7 @@ public class TaskRepository {
      * @throws Exception If there is an error during the reinitialization.
      */
     public int reInitTasks() {
-        return taskJpaRepository.updateTaskStatusByNodeId(TaskStatus.NOT_STARTED, config.getNodeId());
+        return taskJpaRepository.updateStatusByNodeId(TaskStatus.NOT_STARTED, config.getNodeId());
     }
 
     /**
@@ -234,7 +234,7 @@ public class TaskRepository {
      * @return The number of tasks reinitialized.
      */
     public int reInitTasks(String nodeId) {
-        return taskJpaRepository.updateTaskStatusByNodeId(TaskStatus.NOT_STARTED, nodeId);
+        return taskJpaRepository.updateStatusByNodeId(TaskStatus.NOT_STARTED, nodeId);
     }
 
     /**

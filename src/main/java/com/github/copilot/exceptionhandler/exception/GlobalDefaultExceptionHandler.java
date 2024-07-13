@@ -1,6 +1,6 @@
 package com.github.copilot.exceptionhandler.exception;
 
-import com.github.copilot.exceptionhandler.R;
+import com.github.copilot.exceptionhandler.Result;
 import com.github.copilot.exceptionhandler.entity.ExceptionInfo;
 import com.github.copilot.exceptionhandler.exception.category.BizException;
 import com.github.copilot.exceptionhandler.exception.error.CommonErrorCode;
@@ -46,10 +46,10 @@ public class GlobalDefaultExceptionHandler {
      */
     @ExceptionHandler(value = NoHandlerFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public R handlerNoHandlerFoundException(NoHandlerFoundException e) throws Throwable {
+    public Result handlerNoHandlerFoundException(NoHandlerFoundException e) throws Throwable {
         Long id = saveLog(NoHandlerFoundException.class, e);
         outPutErrorWarn(NoHandlerFoundException.class, CommonErrorCode.NOT_FOUND, e);
-        return R.ofFail(CommonErrorCode.NOT_FOUND, id);
+        return Result.ofFail(CommonErrorCode.NOT_FOUND, id);
     }
 
     /**
@@ -61,12 +61,12 @@ public class GlobalDefaultExceptionHandler {
      * @throws Throwable
      */
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public R handlerHttpRequestMethodNotSupportedException(
+    public Result handlerHttpRequestMethodNotSupportedException(
             HttpRequestMethodNotSupportedException e) throws Throwable {
         Long id = saveLog(HttpRequestMethodNotSupportedException.class, e);
         outPutErrorWarn(HttpRequestMethodNotSupportedException.class,
                 CommonErrorCode.METHOD_NOT_ALLOWED, e);
-        return R.ofFail(CommonErrorCode.METHOD_NOT_ALLOWED, id);
+        return Result.ofFail(CommonErrorCode.METHOD_NOT_ALLOWED, id);
     }
 
     /**
@@ -78,12 +78,12 @@ public class GlobalDefaultExceptionHandler {
      * @throws Throwable
      */
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
-    public R handlerHttpMediaTypeNotSupportedException(
+    public Result handlerHttpMediaTypeNotSupportedException(
             HttpMediaTypeNotSupportedException e) throws Throwable {
         Long id = saveLog(HttpMediaTypeNotSupportedException.class, e);
         outPutErrorWarn(HttpMediaTypeNotSupportedException.class,
                 CommonErrorCode.UNSUPPORTED_MEDIA_TYPE, e);
-        return R.ofFail(CommonErrorCode.UNSUPPORTED_MEDIA_TYPE, id);
+        return Result.ofFail(CommonErrorCode.UNSUPPORTED_MEDIA_TYPE, id);
     }
 
     /**
@@ -95,7 +95,7 @@ public class GlobalDefaultExceptionHandler {
      * @throws Throwable
      */
     @ExceptionHandler(value = Exception.class)
-    public R handlerException(Exception e) throws Throwable {
+    public Result handlerException(Exception e) throws Throwable {
         return ifDepthExceptionType(e);
     }
 
@@ -108,10 +108,10 @@ public class GlobalDefaultExceptionHandler {
      * @return A standardized error response based on the specific exceptionhandler type.
      * @throws Throwable
      */
-    private R ifDepthExceptionType(Throwable throwable) throws Throwable {
+    private Result ifDepthExceptionType(Throwable throwable) throws Throwable {
         Long id = saveLog(Exception.class, throwable);
         outPutError(Exception.class, CommonErrorCode.EXCEPTION, throwable);
-        return R.ofFail(CommonErrorCode.EXCEPTION, id);
+        return Result.ofFail(CommonErrorCode.EXCEPTION, id);
     }
 
     /**
@@ -123,10 +123,10 @@ public class GlobalDefaultExceptionHandler {
      * @throws Throwable
      */
     @ExceptionHandler(value = BizException.class)
-    public R handlerBusinessException(BizException e) throws Throwable {
+    public Result handlerBusinessException(BizException e) throws Throwable {
         Long id = saveLog(BizException.class, e);
         outPutError(BizException.class, CommonErrorCode.BUSINESS_ERROR, e);
-        return R.ofFail(e.getCode(), e.getMessage(), id);
+        return Result.ofFail(e.getCode(), e.getMessage(), id);
     }
 
     /**
@@ -138,12 +138,12 @@ public class GlobalDefaultExceptionHandler {
      * @throws Throwable
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public R handleHttpMessageNotReadableException(HttpMessageNotReadableException e) throws Throwable {
+    public Result handleHttpMessageNotReadableException(HttpMessageNotReadableException e) throws Throwable {
         Long id = saveLog(HttpMessageNotReadableException.class, e);
         outPutError(HttpMessageNotReadableException.class, CommonErrorCode.PARAM_ERROR, e);
         String msg = String.format("%s : 错误详情( %s )", CommonErrorCode.PARAM_ERROR.getMessage(),
                 e.getRootCause().getMessage());
-        return R.ofFail(CommonErrorCode.PARAM_ERROR.getCode(), msg, id);
+        return Result.ofFail(CommonErrorCode.PARAM_ERROR.getCode(), msg, id);
     }
 
     /**
@@ -155,7 +155,7 @@ public class GlobalDefaultExceptionHandler {
      * @throws Throwable
      */
     @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class})
-    public R handleValidationException(Exception e) throws Throwable {
+    public Result handleValidationException(Exception e) throws Throwable {
         Long id = saveLog(e.getClass(), e);
         BindingResult bindingResult = (e instanceof MethodArgumentNotValidException) ?
                 ((MethodArgumentNotValidException) e).getBindingResult() :
@@ -170,7 +170,7 @@ public class GlobalDefaultExceptionHandler {
      * @param id The log id for the error.
      * @return A standardized error response with validation error details.
      */
-    private R getBindResultDTO(BindingResult bindingResult, Long id) {
+    private Result getBindResultDTO(BindingResult bindingResult, Long id) {
         List<FieldError> fieldErrors = bindingResult.getFieldErrors();
         if (log.isDebugEnabled()) {
             for (FieldError error : fieldErrors) {
@@ -180,10 +180,10 @@ public class GlobalDefaultExceptionHandler {
 
         if (fieldErrors.isEmpty()) {
             log.error("validExceptionHandler error fieldErrors is empty");
-            R.ofFail(CommonErrorCode.BUSINESS_ERROR, id);
+            Result.ofFail(CommonErrorCode.BUSINESS_ERROR, id);
         }
 
-        return R
+        return Result
                 .ofFail(CommonErrorCode.PARAM_ERROR.getCode(), fieldErrors.get(0).getDefaultMessage(), id);
     }
 

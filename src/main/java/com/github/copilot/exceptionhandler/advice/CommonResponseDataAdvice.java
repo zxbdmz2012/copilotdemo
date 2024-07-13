@@ -2,8 +2,7 @@ package com.github.copilot.exceptionhandler.advice;
 
 import com.alibaba.fastjson.JSON;
 import com.github.copilot.exceptionhandler.GlobalDefaultProperties;
-import com.github.copilot.exceptionhandler.R;
-import com.github.copilot.exceptionhandler.annotation.Result;
+import com.github.copilot.exceptionhandler.Result;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -74,20 +73,20 @@ public class CommonResponseDataAdvice implements ResponseBodyAdvice<Object> {
         // Handle null response body
         if (o == null) {
             if (methodParameter.getParameterType().getName().equals("java.lang.String")) {
-                return JSON.toJSON(R.ofSuccess()).toString();
+                return JSON.toJSON(Result.ofSuccess()).toString();
             }
-            return R.ofSuccess();
+            return Result.ofSuccess();
         }
         // Directly return if the response is already in the desired format
-        if (o instanceof R) {
-            return (R<Object>) o;
+        if (o instanceof Result) {
+            return (Result<Object>) o;
         }
         // Special handling for String responses to avoid ClassCastException
         if (o instanceof String) {
-            return JSON.toJSON(R.ofSuccess(o)).toString();
+            return JSON.toJSON(Result.ofSuccess(o)).toString();
         }
         // Wrap the response body in the standardized format
-        return R.ofSuccess(o);
+        return Result.ofSuccess(o);
     }
 
     /**
@@ -112,7 +111,7 @@ public class CommonResponseDataAdvice implements ResponseBodyAdvice<Object> {
         }
 
         // Apply advice if the method is annotated with @Result
-        return methodParameter.getMethod().isAnnotationPresent(Result.class);
+        return methodParameter.getMethod().isAnnotationPresent(com.github.copilot.exceptionhandler.annotation.Result.class);
     }
 
 }
