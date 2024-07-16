@@ -4,6 +4,13 @@ config:
 spring:
   main:
     allow-circular-references: true
+  freemarker:
+    suffix: .ftl
+    content-type: text/html
+    charset: utf-8
+    cache: false
+    template-loader-path: classpath:/templates/freemarker/
+    check-template-location: true
   mail:
     host: smtp.test.com
     username: userId

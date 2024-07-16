@@ -1,174 +1,78 @@
 package com.github.copilot.mail.model;
 
-
-import java.io.InputStream;
+import lombok.Data;
 import java.io.Serializable;
+import java.util.Map;
 
 /**
- * @Description: 邮件模型
+ * Represents the model for an email message.
  */
+@Data
 public class BaseMessage implements Serializable {
 
-
     /**
-     * 发送者
+     * The sender's email address.
      */
     private String from;
 
     /**
-     * 接受者
+     * The recipient(s) email addresses.
      */
     private String[] to;
 
     /**
-     * 抄送着
+     * The carbon copy (CC) recipient(s) email addresses.
      */
     private String[] cc;
 
     /**
-     * 邮件主题
+     * The subject of the email.
      */
     private String subject;
 
     /**
-     * 邮件主题内容
+     * The text content of the email.
      */
     private String text;
 
     /**
-     * 标识
+     * Indicates if the email content is HTML (true) or plain text (false).
      */
-    private String attachFlag;
-
     private boolean html = true;
 
-    public boolean isHtml() {
-        return html;
-    }
-
-    public void setHtml(boolean html) {
-        this.html = html;
-    }
-
     /**
-     * 附件类型
+     * The type of the attachment.
      */
     private String attachType;
 
     /**
-     * 附件名称
+     * The name of the attachment.
      */
     private String attachName;
 
     /**
-     * 附件内容
+     * The content of the attachment.
      */
     private String attachContent;
 
-    private String filePath;
     /**
-     * 附件流
+     * The file path of the attachment.
      */
-    private InputStream is;
+    private String filePath;
 
+    /**
+     * The name of the template used for generating the email content.
+     */
+    private String templateName;
+
+    /**
+     * The model data for the template.
+     */
+    private Map<String, Object> model;
+
+    /**
+     * Default constructor.
+     */
     public BaseMessage() {
-    }
-
-    public String getFilePath() {
-        return filePath;
-    }
-
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
-    }
-
-    public String getFrom() {
-        return from;
-    }
-
-    public void setFrom(String from) {
-        this.from = from;
-    }
-
-    public String[] getTo() {
-        return to;
-    }
-
-
-    public void setTo(String[] to) {
-        this.to = to;
-    }
-
-    public String[] getCc() {
-        return cc;
-    }
-
-    public void setCc(String[] cc) {
-        this.cc = cc;
-    }
-
-    public String getSubject() {
-        return subject;
-    }
-
-    public void setSubject(String subject) {
-        this.subject = subject;
-    }
-
-    public String getText() {
-        return text;
-    }
-
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
-
-    public String getAttachFlag() {
-        return attachFlag;
-    }
-
-
-    public void setAttachFlag(String attachFlag) {
-        this.attachFlag = attachFlag;
-    }
-
-
-    public String getAttachType() {
-        return attachType;
-    }
-
-
-    public void setAttachType(String attachType) {
-        this.attachType = attachType;
-    }
-
-
-    public String getAttachName() {
-        return attachName;
-    }
-
-
-    public void setAttachName(String attachName) {
-        this.attachName = attachName;
-    }
-
-
-    public String getAttachContent() {
-        return attachContent;
-    }
-
-
-    public void setAttachContent(String attachContent) {
-        this.attachContent = attachContent;
-    }
-
-    public InputStream getIs() {
-        return is;
-    }
-
-    public void setIs(InputStream is) {
-        this.is = is;
     }
 }

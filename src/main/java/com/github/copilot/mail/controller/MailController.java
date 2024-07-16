@@ -2,7 +2,6 @@ package com.github.copilot.mail.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.github.copilot.mail.model.BaseMessage;
-import com.github.copilot.mail.service.MailManageService;
 import com.github.copilot.mail.service.MailSendService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class MailController {
 
     @Autowired
-    private MailManageService manageService;
+    private MailSendService mailSendService;
 
     /**
      * General email sending interface.
@@ -29,7 +28,7 @@ public class MailController {
     @ResponseBody
     public String generalSend(@RequestBody BaseMessage baseMessage) {
         log.info("[General Request] Starting mail send request, original request parameters: {}", JSONObject.toJSONString(baseMessage));
-        return manageService.preposition(baseMessage);
+        return mailSendService.sendEmail(baseMessage);
     }
 
 }
