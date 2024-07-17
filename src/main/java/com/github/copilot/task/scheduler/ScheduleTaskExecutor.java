@@ -61,24 +61,27 @@ public class ScheduleTaskExecutor {
 
     @PostConstruct
     public void init() {
-        /**
-         * 根据配置选择一个节点获取任务的策略
-         */
-        strategy = Strategy.choose(config.getNodeStrategy());
-        /**
-         * 自定义线程池，初始线程数量corePoolSize，线程池等待队列大小queueSize，当初始线程都有任务，并且等待队列满后
-         * 线程数量会自动扩充最大线程数maxSize，当新扩充的线程空闲60s后自动回收.自定义线程池是因为Executors那几个线程工具
-         * 各有各的弊端，不适合生产使用
-         */
-        workerPool = new ThreadPoolExecutor(config.getCorePoolSize(), config.getMaxPoolSize(), 60, TimeUnit.SECONDS, new ArrayBlockingQueue<>(config.getQueueSize()));
-        /**
-         * 执行待处理任务加载线程
-         */
-        bossPool.execute(new Loader());
-        /**
-         * 执行任务调度线程
-         */
-        bossPool.execute(new Boss());
+        if (config.isRecoverEnable() && config.isHeartBeatEnable()) {
+
+            /**
+             * 根据配置选择一个节点获取任务的策略
+             */
+            strategy = Strategy.choose(config.getNodeStrategy());
+            /**
+             * 自定义线程池，初始线程数量corePoolSize，线程池等待队列大小queueSize，当初始线程都有任务，并且等待队列满后
+             * 线程数量会自动扩充最大线程数maxSize，当新扩充的线程空闲60s后自动回收.自定义线程池是因为Executors那几个线程工具
+             * 各有各的弊端，不适合生产使用
+             */
+            workerPool = new ThreadPoolExecutor(config.getCorePoolSize(), config.getMaxPoolSize(), 60, TimeUnit.SECONDS, new ArrayBlockingQueue<>(config.getQueueSize()));
+            /**
+             * 执行待处理任务加载线程
+             */
+            bossPool.execute(new Loader());
+            /**
+             * 执行任务调度线程
+             */
+            bossPool.execute(new Boss());
+        }
 
     }
 

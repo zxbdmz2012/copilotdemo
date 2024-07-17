@@ -84,7 +84,7 @@ public class MailSendService {
         }
 
         // Assuming the template name directly maps to a .ftl file under /resources/templates/freemarker
-        String templatePath = "/templates/freemarker/" + email.getTemplateName() + ".ftl";
+        String templatePath = "/template/freemarker/" + email.getTemplateName() + ".ftl";
 
         Map<String, Object> model = email.getModel();
         // Use FreemarkerConfigUtil to generate the HTML content

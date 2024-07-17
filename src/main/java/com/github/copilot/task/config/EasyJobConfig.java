@@ -1,6 +1,9 @@
 package com.github.copilot.task.config;
 
 import lombok.Data;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -17,8 +20,9 @@ import java.util.Date;
  */
 @Component
 @Data
-public class EasyJobConfig {
+public class EasyJobConfig implements InitializingBean {
 
+    private static final Logger log = LoggerFactory.getLogger(EasyJobConfig.class);
     private String nodeId;
 
     /**
@@ -64,15 +68,15 @@ public class EasyJobConfig {
     private int heartBeatSeconds;
 
     /**
-     * Whether the node heartbeat mechanism is enabled. Default is true.
+     * Whether the node heartbeat mechanism is enabled. Default is false.
      */
-    @Value("${easyjob.heartBeat.enable:true}")
+    @Value("${easyjob.heartBeat.enable:false}")
     private boolean heartBeatEnable;
 
     /**
-     * Whether the recovery mechanism is enabled for handling failed tasks. Default is true.
+     * Whether the recovery mechanism is enabled for handling failed tasks. Default is false.
      */
-    @Value("${easyjob.recover.enable:true}")
+    @Value("${easyjob.recover.enable:false}")
     private boolean recoverEnable;
 
     /**
@@ -101,4 +105,10 @@ public class EasyJobConfig {
      * The system start time, used for monitoring and possibly for recovery mechanisms.
      */
     private Date sysStartTime;
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        log.info("Recovery mechanism enabled: {}", recoverEnable);
+        log.info("Heartbeat mechanism enabled: {}", heartBeatEnable);
+    }
 }

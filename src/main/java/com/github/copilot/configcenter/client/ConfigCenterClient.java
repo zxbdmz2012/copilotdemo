@@ -279,11 +279,15 @@ public class ConfigCenterClient {
     private List<ConfigVO> httpResp2ConfigVOList(HttpRespBO httpRespBO) {
         // Check if the HTTP response is successful (status code 200)
         if (!httpRespBO.success()) {
-            throw new IllegalArgumentException("Failed to get configuration: code:" + httpRespBO.getCode() + ",msg:" + httpRespBO.getMessage());
+            log.error("Failed to get configuration: code:{},msg:{}", httpRespBO.getCode(), httpRespBO.getMessage());
+            return new ArrayList<>();
+
         }
         // Check if the HTTP response body is null
         if (httpRespBO.getBody() == null) {
-            throw new IllegalArgumentException("Failed to get configuration, body is null: code:" + httpRespBO.getCode() + ",msg:" + httpRespBO.getMessage());
+            log.error("Failed to get configuration, body is null: code:{},msg:{}", httpRespBO.getCode(), httpRespBO.getMessage());
+            return new ArrayList<>();
+
         }
         // Parse the HTTP response body into a Result object
         Result<?> result = JSON.parseObject(new String(httpRespBO.getBody(), StandardCharsets.UTF_8), Result.class);

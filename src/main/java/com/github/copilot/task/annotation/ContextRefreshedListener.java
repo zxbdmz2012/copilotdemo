@@ -75,62 +75,65 @@ public class ContextRefreshedListener implements ApplicationListener<ContextRefr
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        /**
-         * 初始化系统启动时间,用于解决系统重启后，还是按照之前时间执行任务
-         */
-        config.setSysStartTime(new Date());
-        /**
-         * 重启重新初始化本节点的任务状态
-         */
-        taskRepository.reInitTasks();
-        /**
-         * 查出数据库所有的任务名称
-         */
-        allTaskNames = taskRepository.listAllTaskNames();
+        if (config.isRecoverEnable() && config.isHeartBeatEnable()) {
 
-        taskMap = taskRepository.listAllTasks();
-        /**
-         * 判断根容器为Spring容器，防止出现调用两次的情况（mvc加载也会触发一次）
-         */
-        if (event.getApplicationContext().getParent() == null) {
             /**
-             * 判断调度开关是否打开
-             * 如果打开了：加载调度注解并将调度添加到调度管理中
+             * 初始化系统启动时间,用于解决系统重启后，还是按照之前时间执行任务
              */
-            ApplicationContext context = event.getApplicationContext();
-            Map<String, Object> beans = context.getBeansWithAnnotation(org.springframework.scheduling.annotation.EnableScheduling.class);
-            if (beans == null) {
-                return;
-            }
+            config.setSysStartTime(new Date());
             /**
-             * 用来存放被调度注解修饰的方法名和Method的映射
+             * 重启重新初始化本节点的任务状态
              */
-            Map<String, Method> methodMap = new HashMap<>();
+            taskRepository.reInitTasks();
             /**
-             * 查找所有直接或者间接被Component注解修饰的类，因为不管Service，Controller等都包含了Component，也就是
-             * 只要是被纳入了spring容器管理的类必然直接或者间接的被Component修饰
+             * 查出数据库所有的任务名称
              */
-            Map<String, Object> allBeans = context.getBeansWithAnnotation(org.springframework.stereotype.Component.class);
-            Set<Map.Entry<String, Object>> entrys = allBeans.entrySet();
+            allTaskNames = taskRepository.listAllTaskNames();
+
+            taskMap = taskRepository.listAllTasks();
             /**
-             * 遍历bean和里面的method找到被Scheduled注解修饰的方法,然后将任务放入任务调度里
+             * 判断根容器为Spring容器，防止出现调用两次的情况（mvc加载也会触发一次）
              */
-            for (Map.Entry entry : entrys) {
-                Object obj = entry.getValue();
-                Class clazz = obj.getClass();
-                Method[] methods = clazz.getMethods();
-                for (Method m : methods) {
-                    if (m.isAnnotationPresent(Scheduled.class)) {
-                        handleSheduledAnn(m);
+            if (event.getApplicationContext().getParent() == null) {
+                /**
+                 * 判断调度开关是否打开
+                 * 如果打开了：加载调度注解并将调度添加到调度管理中
+                 */
+                ApplicationContext context = event.getApplicationContext();
+                Map<String, Object> beans = context.getBeansWithAnnotation(org.springframework.scheduling.annotation.EnableScheduling.class);
+                if (beans == null) {
+                    return;
+                }
+                /**
+                 * 用来存放被调度注解修饰的方法名和Method的映射
+                 */
+                Map<String, Method> methodMap = new HashMap<>();
+                /**
+                 * 查找所有直接或者间接被Component注解修饰的类，因为不管Service，Controller等都包含了Component，也就是
+                 * 只要是被纳入了spring容器管理的类必然直接或者间接的被Component修饰
+                 */
+                Map<String, Object> allBeans = context.getBeansWithAnnotation(org.springframework.stereotype.Component.class);
+                Set<Map.Entry<String, Object>> entrys = allBeans.entrySet();
+                /**
+                 * 遍历bean和里面的method找到被Scheduled注解修饰的方法,然后将任务放入任务调度里
+                 */
+                for (Map.Entry entry : entrys) {
+                    Object obj = entry.getValue();
+                    Class clazz = obj.getClass();
+                    Method[] methods = clazz.getMethods();
+                    for (Method m : methods) {
+                        if (m.isAnnotationPresent(Scheduled.class)) {
+                            handleSheduledAnn(m);
+                        }
                     }
                 }
-            }
 
-            /**
-             * 由于taskIdMap只是启动spring完成后使用一次，这里可以直接清空
-             */
-            taskIdMap.clear();
-            taskMap.clear();
+                /**
+                 * 由于taskIdMap只是启动spring完成后使用一次，这里可以直接清空
+                 */
+                taskIdMap.clear();
+                taskMap.clear();
+            }
         }
     }
 
