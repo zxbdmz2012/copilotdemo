@@ -1,5 +1,6 @@
 package com.github.copilot.rpc.server;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.copilot.rpc.common.RPCRequest;
 import com.github.copilot.rpc.common.RPCResponse;
 import lombok.NoArgsConstructor;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.LinkedHashMap;
 
 // RpcController is a class that handles incoming RPC requests.
 // It uses the Spring @RestController annotation, which means it's a controller where every method returns a domain object instead of a view.
@@ -47,8 +49,20 @@ public class RpcController {
         Method method = null;
         try {
             method = service.getClass().getMethod(request.getMethodName(), request.getParamsTypes());
-            Object invoke = method.invoke(service, request.getParams());
-            // If the method call is successful, return a success response with the result of the method call.
+
+            Object[] params = request.getParams();
+            Class<?>[] paramTypes = request.getParamsTypes();
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            for (int i = 0; i < params.length; i++) {
+                if (params[i] instanceof LinkedHashMap) {
+                    // 将LinkedHashMap转换为正确的类型
+                    params[i] = objectMapper.convertValue(params[i], paramTypes[i]);
+                }
+            }
+
+            Object invoke = method.invoke(service, params);
+// 如果方法调用成功，返回成功响应，包含方法调用的结果      // If the method call is successful, return a success response with the result of the method call.
             return RPCResponse.success(invoke);
         } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
