@@ -33,9 +33,9 @@ public class GlobalDefaultConfiguration {
     }
 
     /**
-     * Defines a bean for common response data advice.
+     * Defines a bean for db response data advice.
      * This bean is responsible for ensuring that responses from all controllers
-     * adhere to a common format. It is conditionally created based on the
+     * adhere to a db format. It is conditionally created based on the
      * OnGlobalExceptionHandlerCondition, providing flexibility in its application.
      *
      * @param globalDefaultProperties The global default properties to configure the advice.

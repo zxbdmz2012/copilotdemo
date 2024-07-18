@@ -133,11 +133,11 @@ public class Result<T> implements Serializable {
     }
 
     /**
-     * Creates a failure response based on a predefined common error code.
+     * Creates a failure response based on a predefined db error code.
      *
-     * @param resultEnum The common error code enumeration.
+     * @param resultEnum The db error code enumeration.
      * @param id         The unique identifier for the response.
-     * @return A new R instance representing a failed operation based on a common error code.
+     * @return A new R instance representing a failed operation based on a db error code.
      */
     public static Result ofFail(CommonErrorCode resultEnum, Long id) {
         Result result = new Result();

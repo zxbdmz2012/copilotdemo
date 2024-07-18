@@ -3,10 +3,13 @@ package com.github.copilot.task.entity;
 import com.github.copilot.db.BaseEntity;
 import com.github.copilot.task.common.Invocation;
 import com.github.copilot.task.enums.TaskStatus;
+import com.github.copilot.task.serializer.JsonSerializationSerializer;
+import com.github.copilot.task.utils.CronExpression;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
+import java.text.ParseException;
 import java.util.Date;
 
 @Entity
@@ -89,10 +92,16 @@ public class Task extends BaseEntity {
     private Invocation invokor;
 
 
-    public Task(String name, String cronExpr, Invocation invokor) {
+    public Task(String name, String cronExpr, Invocation invokor) throws ParseException {
         this.name = name;
         this.cronExpr = cronExpr;
         this.invokor = invokor;
+        CronExpression cronExpession = new CronExpression(this.getCronExpr());
+        Date nextStartDate = cronExpession.getNextValidTimeAfter(new Date());
+        this.setFirstStartTime(nextStartDate);
+        this.setNextStartTime(nextStartDate);
+        JsonSerializationSerializer<Invocation> serializer = new JsonSerializationSerializer<>();
+        this.invokeInfo = serializer.serialize(invokor);
     }
 
 }
