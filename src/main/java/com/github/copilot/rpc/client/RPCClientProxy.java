@@ -1,5 +1,7 @@
 package com.github.copilot.rpc.client;
 
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.copilot.rpc.common.RPCRequest;
 import com.github.copilot.rpc.common.RPCResponse;
 import com.github.copilot.rpc.common.ServiceProperties;
@@ -15,6 +17,7 @@ import java.util.Map;
 // This class is responsible for creating a proxy for the remote service and handling method invocations
 public class RPCClientProxy implements InvocationHandler {
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final RestClient restClient;
     private final ServiceProperties serviceProperties;
@@ -63,7 +66,8 @@ public class RPCClientProxy implements InvocationHandler {
 
         // Return the data from the response
         if (response.isSuccess()) {
-            return response.getResult();
+            JavaType returnType = objectMapper.getTypeFactory().constructType(method.getGenericReturnType());
+            return objectMapper.convertValue(response.getResult(), returnType);
         } else {
             throw new RuntimeException("RPC call failed");
         }
