@@ -3,7 +3,7 @@ package com.github.copilot.task.entity;
 import com.github.copilot.db.BaseEntity;
 import com.github.copilot.task.common.Invocation;
 import com.github.copilot.task.enums.TaskStatus;
-import com.github.copilot.task.serializer.JsonSerializationSerializer;
+import com.github.copilot.task.serializer.JdkSerializationSerializer;
 import com.github.copilot.task.utils.CronExpression;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -66,7 +66,7 @@ public class Task extends BaseEntity {
     /**
      * 执行信息
      */
-    private byte[] invokeInfo;
+    private byte[] invokeInfoJson;
 
     @Version
     private Integer version;
@@ -89,19 +89,13 @@ public class Task extends BaseEntity {
      * 任务的执行者
      */
     @Transient
-    private Invocation invokor;
+    private Invocation invocation;
 
 
-    public Task(String name, String cronExpr, Invocation invokor) throws ParseException {
+    public Task(String name, String cronExpr, Invocation invocation) throws ParseException {
         this.name = name;
         this.cronExpr = cronExpr;
-        this.invokor = invokor;
-        CronExpression cronExpession = new CronExpression(this.getCronExpr());
-        Date nextStartDate = cronExpession.getNextValidTimeAfter(new Date());
-        this.setFirstStartTime(nextStartDate);
-        this.setNextStartTime(nextStartDate);
-        JsonSerializationSerializer<Invocation> serializer = new JsonSerializationSerializer<>();
-        this.invokeInfo = serializer.serialize(invokor);
+        this.invocation = invocation;
     }
 
 }

@@ -11,7 +11,7 @@ import java.io.StringWriter;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "exception_info")
+@Table(name = "exception_information")
 @Getter
 @Setter
 @ToString
@@ -28,7 +28,7 @@ public class ExceptionInfo extends BaseEntity {
             allocationSize = 1)
     private Long id;
 
-    @Length(max = 50)
+    @Length(max = 255)
     private String message;
 
     @Lob

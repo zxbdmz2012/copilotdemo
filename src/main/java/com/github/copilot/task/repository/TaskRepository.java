@@ -5,7 +5,7 @@ import com.github.copilot.task.config.EasyJobConfig;
 import com.github.copilot.task.entity.Task;
 import com.github.copilot.task.entity.TaskDetail;
 import com.github.copilot.task.enums.TaskStatus;
-import com.github.copilot.task.serializer.JsonSerializationSerializer;
+import com.github.copilot.task.serializer.JdkSerializationSerializer;
 import com.github.copilot.task.serializer.ObjectSerializer;
 import com.github.copilot.task.utils.CronExpression;
 import org.slf4j.Logger;
@@ -33,7 +33,7 @@ public class TaskRepository {
     /**
      * Serializer for task invocation information.
      */
-    private final ObjectSerializer serializer = new JsonSerializationSerializer<Invocation>();
+    private final ObjectSerializer serializer = new JdkSerializationSerializer();
 
     @Resource
     private NodeJpaRepository nodeJpaRepository;
@@ -56,9 +56,6 @@ public class TaskRepository {
         return map;
     }
 
-    public void del(Long taskId){
-        taskJpaRepository.deleteById(taskId);
-    }
     /**
      * Lists tasks that are not started and are scheduled to start within a specified duration.
      *
@@ -80,16 +77,6 @@ public class TaskRepository {
      */
     public List<String> listAllTaskNames() {
         return taskJpaRepository.findAll().stream().map(Task::getName).collect(Collectors.toList());
-    }
-
-    /**
-     * Lists details for a specific task identified by its ID.
-     *
-     * @param taskId The ID of the task.
-     * @return A list of task details associated with the specified task.
-     */
-    public List<TaskDetail> listDetails(Long taskId) {
-        return taskDetailJpaRepository.findByTaskId(taskId);
     }
 
     /**
@@ -115,7 +102,7 @@ public class TaskRepository {
     public Task get(Long id) {
         Task task = taskJpaRepository.findById(id).orElse(null);
         if (task != null) {
-            task.setInvokor((Invocation) serializer.deserialize(task.getInvokeInfo()));
+            task.setInvocation((Invocation) serializer.deserialize(task.getInvokeInfoJson()));
         }
         return task;
     }
@@ -138,11 +125,13 @@ public class TaskRepository {
      * @throws Exception If there is an error during insertion.
      */
     public long insert(Task task) throws Exception {
-        CronExpression cronExpression = new CronExpression(task.getCronExpr());
-        Date nextStartDate = cronExpression.getNextValidTimeAfter(new Date());
+        task.setStatus(TaskStatus.NOT_STARTED);
+        CronExpression cronExpession = new CronExpression(task.getCronExpr());
+        Date nextStartDate = cronExpession.getNextValidTimeAfter(new Date());
         task.setFirstStartTime(nextStartDate);
         task.setNextStartTime(nextStartDate);
-        task.setStatus(TaskStatus.NOT_STARTED);
+        JdkSerializationSerializer<Invocation> serializer = new JdkSerializationSerializer<>();
+        task.setInvokeInfoJson(serializer.serialize(task.getInvocation()));
         Task save = taskJpaRepository.save(task);
         return save.getId();
     }
@@ -244,45 +233,64 @@ public class TaskRepository {
      * @return true if the update was successful, false otherwise.
      */
     public boolean updateTaskDetail(TaskDetail taskDetail) {
-        int maxRetries = 3; // Maximum number of retries
-        for (int attempt = 0; attempt < maxRetries; attempt++) {
+        int retryCount = 3; // 设置重试次数
+        while (retryCount > 0) {
             try {
-                taskDetailJpaRepository.save(taskDetail);
-                return true; // Optimistic lock success, entity saved successfully
-            } catch (ObjectOptimisticLockingFailureException | OptimisticLockException e) {
-                log.error("Attempt {} to update taskDetail {} failed", attempt + 1, taskDetail.getId(), e);
-                // Last attempt, no more retries left
-                if (attempt == maxRetries - 1) {
-                    log.error("Final attempt to update taskDetail {} failed", taskDetail.getId(), e);
-                    return false; // Optimistic lock failed, entity save failed after all retries
+                // 从数据库重新读取最新的任务详情状态
+                TaskDetail latestTaskDetail = taskDetailJpaRepository.findById(taskDetail.getId()).orElse(null);
+                if (latestTaskDetail == null) {
+                    log.error("TaskDetail with id {} not found", taskDetail.getId());
+                    return false;
                 }
-            }
-        }
-        return false; // Should never reach here
-    }
+                // 更新所有相关字段
+                latestTaskDetail.setStatus(taskDetail.getStatus());
+                latestTaskDetail.setEndTime(taskDetail.getEndTime());
+                latestTaskDetail.setErrorMsg(taskDetail.getErrorMsg());
+                latestTaskDetail.setStartTime(taskDetail.getStartTime());
 
-    /**
-     * Attempts to update a task in the database, retrying in case of optimistic locking failures.
-     *
-     * @param task The task to update.
-     * @return true if the update was successful, false otherwise.
-     */
-    public boolean updateTask(Task task) {
-        int retryCount = 3; // Number of retries
-        while (retryCount >= 0) {
-            try {
-                taskJpaRepository.save(task);
-                return true; // Optimistic lock success, entity saved successfully
+                taskDetailJpaRepository.save(latestTaskDetail); // 尝试保存更新
+                return true; // 更新成功
             } catch (ObjectOptimisticLockingFailureException | OptimisticLockException e) {
-                log.error("update task {} error, retrying...", task.getId(), e);
-                retryCount--;
-                if (retryCount < 0) {
-                    log.error("update task {} error after retry", task.getId(), e);
-                    return false; // Optimistic lock failed, entity save failed
-                }
+                log.error("Optimistic locking failure for taskDetail {}, retrying...", taskDetail.getId(), e);
+                retryCount--; // 减少重试次数
             }
         }
-        return false;
+        log.error("Failed to update taskDetail {} after retries", taskDetail.getId());
+        return false; // 所有重试后仍然失败
+    }
+    public boolean updateTask(Task task) {
+        int retryCount = 3; // 设置重试次数
+        while (retryCount > 0) {
+            try {
+                // 从数据库重新读取最新的任务状态
+                Task latestTask = taskJpaRepository.findById(task.getId()).orElse(null);
+                if (latestTask == null) {
+                    log.error("Task with id {} not found", task.getId());
+                    return false;
+                }
+                // 更新所有字段
+                latestTask.setName(task.getName());
+                latestTask.setCronExpr(task.getCronExpr());
+                latestTask.setNodeId(task.getNodeId());
+                latestTask.setStatus(task.getStatus());
+                latestTask.setSuccessCount(task.getSuccessCount());
+                latestTask.setFailCount(task.getFailCount());
+                latestTask.setInvokeInfoJson(task.getInvokeInfoJson());
+                latestTask.setVersion(task.getVersion()); // 注意：实际上，版本字段应由JPA自动处理
+                latestTask.setFirstStartTime(task.getFirstStartTime());
+                latestTask.setNextStartTime(task.getNextStartTime());
+                latestTask.setFinalEndTime(task.getFinalEndTime());
+                // 注意：invocation字段是Transient的，不需要持久化
+
+                taskJpaRepository.save(latestTask); // 尝试保存更新
+                return true; // 更新成功
+            } catch (ObjectOptimisticLockingFailureException | OptimisticLockException e) {
+                log.error("Optimistic locking failure for task {}, retrying...", task.getId(), e);
+                retryCount--; // 减少重试次数
+            }
+        }
+        log.error("Failed to update task {} after retries", task.getId());
+        return false; // 所有重试后仍然失败
     }
 
     /**

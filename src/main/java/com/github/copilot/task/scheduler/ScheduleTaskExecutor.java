@@ -9,6 +9,7 @@ import com.github.copilot.task.enums.NotifyCmd;
 import com.github.copilot.task.enums.TaskStatus;
 import com.github.copilot.task.repository.NodeRepository;
 import com.github.copilot.task.repository.TaskRepository;
+import com.github.copilot.task.serializer.JdkSerializationSerializer;
 import com.github.copilot.task.strategy.Strategy;
 import com.github.copilot.task.utils.CronExpression;
 import org.slf4j.Logger;
@@ -105,12 +106,12 @@ public class ScheduleTaskExecutor {
      *
      * @param name
      * @param cronExp
-     * @param invockor
+     * @param invocation
      * @return
      * @throws Exception
      */
-    public long addTask(String name, String cronExp, Invocation invockor) throws Exception {
-        Task task = new Task(name, cronExp, invockor);
+    public long addTask(String name, String cronExp, Invocation invocation) throws Exception {
+        Task task = new Task(name, cronExp, invocation);
         return taskRepository.insert(task);
     }
 
@@ -323,7 +324,7 @@ public class ScheduleTaskExecutor {
                 detail = taskRepository.start(task);
                 if (detail == null) return null;
                 //执行任务
-                task.getInvokor().invoke();
+                task.getInvocation().invoke();
                 //完成任务
                 finish(task, detail);
                 logger.info("finished execute task:{}", task.getId());
