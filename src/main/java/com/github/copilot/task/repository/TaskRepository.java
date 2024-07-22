@@ -171,7 +171,7 @@ public class TaskRepository {
      */
     public void finish(Task task, TaskDetail detail) throws Exception {
         CronExpression cronExpression = new CronExpression(task.getCronExpr());
-        Date nextStartDate = cronExpression.getNextValidTimeAfter(task.getNextStartTime());
+        Date nextStartDate = cronExpression.getNextValidTimeAfter(new Date());
         if (nextStartDate == null) {
             task.setStatus(TaskStatus.FINISH);
         } else {
