@@ -39,7 +39,7 @@ public class RpcController {
     // It takes an RPCRequest as a parameter, which contains the details of the service method to call.
     // It returns an RPCResponse, which contains the result of the service method call.
     private RPCResponse getResponse(RPCRequest request) {
-        // Get the name of the service interface from the request.
+        // Get the name of the service ininsterface from the request.
         String interfaceName = request.getInterfaceName();
         // Get the service implementation object from the ServiceProvider.
         Object service = serviceProvider.getService(interfaceName);
