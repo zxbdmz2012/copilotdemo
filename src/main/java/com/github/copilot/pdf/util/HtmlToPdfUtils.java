@@ -4,25 +4,21 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 import java.io.*;
+import java.util.Map;
 
 public class HtmlToPdfUtils {
 
-    public static void convertToPdf(InputStream inputStream, OutputStream outputStream) {
+    public static void convertToPdf(Map<String, Object> data, OutputStream outputStream) {
         try (PDDocument pdfDocument = new PDDocument()) {
-            // 读取 HTML 内容
-            String htmlContent = readHtmlContent(inputStream);
+            // Render HTML content using Thymeleaf
+            String htmlContent = renderHtmlContent(data);
 
-            // 使用 Jsoup 解析 HTML
-            Document htmlDoc = Jsoup.parse(htmlContent);
-            Elements paragraphs = htmlDoc.select("p");
-
-            // 创建 PDF 页面
+            // Create PDF page
             PDPage page = new PDPage();
             pdfDocument.addPage(page);
 
@@ -32,29 +28,31 @@ public class HtmlToPdfUtils {
                 contentStream.setLeading(14.5f);
                 contentStream.newLineAtOffset(25, 700);
 
-                // 写入 HTML 内容到 PDF
-                for (Element paragraph : paragraphs) {
-                    contentStream.showText(paragraph.text());
-                    contentStream.newLine();
-                }
+                // Write HTML content to PDF
+                contentStream.showText(htmlContent);
+                contentStream.newLine();
 
                 contentStream.endText();
             }
 
-            // 保存 PDF 文档
+            // Save PDF document
             pdfDocument.save(outputStream);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private static String readHtmlContent(InputStream inputStream) throws IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        StringBuilder content = new StringBuilder();
-        String line;
-        while ((line = reader.readLine()) != null) {
-            content.append(line);
-        }
-        return content.toString();
+    private static String renderHtmlContent(Map<String, Object> data) {
+        ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
+        templateResolver.setTemplateMode("HTML");
+        templateResolver.setSuffix(".html");
+
+        TemplateEngine templateEngine = new TemplateEngine();
+        templateEngine.setTemplateResolver(templateResolver);
+
+        Context context = new Context();
+        context.setVariables(data);
+
+        return templateEngine.process("templates/your-template", context);
     }
 }
