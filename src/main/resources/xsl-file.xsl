@@ -43,7 +43,10 @@
     <!-- Template for tables -->
     <xsl:template match="table">
         <fo:table table-layout="fixed" width="100%" border="1pt solid black">
-            <xsl:apply-templates/>
+            <fo:table-column column-width="proportional-column-width(1)"/>
+            <fo:table-body>
+                <xsl:apply-templates/>
+            </fo:table-body>
         </fo:table>
     </xsl:template>
 
@@ -56,6 +59,14 @@
     <xsl:template match="td">
         <fo:table-cell border="1pt solid black" padding="2pt">
             <fo:block>
+                <xsl:apply-templates/>
+            </fo:block>
+        </fo:table-cell>
+    </xsl:template>
+
+    <xsl:template match="th">
+        <fo:table-cell border="1pt solid black" padding="2pt" background-color="#f0f0f0">
+            <fo:block font-weight="bold">
                 <xsl:apply-templates/>
             </fo:block>
         </fo:table-cell>
