@@ -80,7 +80,7 @@ public class TestHtmlToPdf
         // 微软雅黑在windows系统里的位置如下，linux系统直接拷贝该文件放在linux目录下即可
         // String fontPath = "src/main/resources/font/STHeiti Light.ttc,0";
         // 开始转换html生成pdf文档
-        HtmlToPdfUtils.convertToPdf(inputStream, waterMarkText, null, outputStream);
+        HtmlToPdfUtils.convertToPdf(inputStream, outputStream);
         log.info("转换结束，耗时：{}ms",System.currentTimeMillis()-startTime);
     }
 }

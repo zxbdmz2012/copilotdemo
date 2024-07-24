@@ -1,61 +1,39 @@
 package com.github.copilot.pdf.util;
 
-import com.github.copilot.util.StringUtil;
-import com.itextpdf.html2pdf.ConverterProperties;
-import com.itextpdf.html2pdf.HtmlConverter;
-import com.itextpdf.io.font.PdfEncodings;
-import com.itextpdf.kernel.font.PdfFont;
-import com.itextpdf.kernel.font.PdfFontFactory;
-import com.itextpdf.kernel.geom.PageSize;
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfWriter;
-import com.itextpdf.layout.font.FontProvider;
+
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import com.lowagie.text.Document;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.pdf.PdfWriter;
+import com.lowagie.text.html.simpleparser.HTMLWorker;
 
-/**
- * Itext7转换工具类
- */
+import java.io.*;
+
 @Slf4j
-public class HtmlToPdfUtils
-{
+public class HtmlToPdfUtils {
 
-    /**
-     * html转pdf
-     *
-     * @param inputStream  输入流
-     * @param waterMark    水印
-     * @param fontPath     字体路径，ttc后缀的字体需要添加<b>,0<b/>
-     * @param outputStream 输出流
-     * @date : 2022/11/15 14:07
-     */
-    public static void convertToPdf(InputStream inputStream, String waterMark, String fontPath, OutputStream outputStream) throws IOException
-    {
+;
 
-        PdfWriter pdfWriter = new PdfWriter(outputStream);
-        PdfDocument pdfDocument = new PdfDocument(pdfWriter);
-        // 设置为A4大小
-        pdfDocument.setDefaultPageSize(PageSize.A4);
+//        HtmlToPdfUtils.convertToPdf(inputStream, outputStream);
 
-
-        // 读取Html文件流，查找出当中的&nbsp;或出现类似的符号空格字符
-        inputStream = readInputStrem(inputStream);
-        if (inputStream != null)
-        {
-            // 生成pdf文档
-            HtmlConverter.convertToPdf(inputStream, pdfDocument);
-            pdfWriter.close();
-            pdfDocument.close();
-            return;
-        }
-        else
-        {
-            log.error("转换失败！");
+    public static void convertToPdf(InputStream inputStream, OutputStream outputStream) {
+        Document document = new Document();
+        try {
+            PdfWriter.getInstance(document, outputStream);
+            document.open();
+            HTMLWorker htmlWorker = new HTMLWorker(document);
+            htmlWorker.parse(new InputStreamReader(readInputStrem(inputStream)));
+        } catch (DocumentException | IOException e) {
+            e.printStackTrace();
+        } finally {
+            document.close();
         }
     }
+
 
     /**
      * 读取HTML 流文件，并查询当中的&nbsp;或类似符号直接替换为空格
