@@ -1,58 +1,36 @@
 package com.github.copilot.pdf.util;
 
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
-import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
+import org.apache.fop.apps.Fop;
+import org.apache.fop.apps.FopFactory;
+import org.apache.fop.apps.MimeConstants;
+import org.apache.fop.apps.FOUserAgent;
+import net.sf.saxon.TransformerFactoryImpl;
 
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.sax.SAXResult;
+import javax.xml.transform.stream.StreamSource;
 import java.io.*;
-import java.util.Map;
 
 public class HtmlToPdfUtils {
 
-    public static void convertToPdf(Map<String, Object> data, OutputStream outputStream) {
-        try (PDDocument pdfDocument = new PDDocument()) {
-            // Render HTML content using Thymeleaf
-            String htmlContent = renderHtmlContent(data);
+    public static void convertToPdf(InputStream inputStream, OutputStream outputStream) {
+        try {
+            // Setup FOP factory
+            FopFactory fopFactory = FopFactory.newInstance(new File(".").toURI());
+            FOUserAgent foUserAgent = fopFactory.newFOUserAgent();
 
-            // Create PDF page
-            PDPage page = new PDPage();
-            pdfDocument.addPage(page);
+            // Setup SAX transformer
+            TransformerFactory transformerFactory = new TransformerFactoryImpl();
+            Transformer transformer = transformerFactory.newTransformer(new StreamSource(new File("src/main/resources/xsl-file.xsl")));
+            // Setup input and output
+            StreamSource source = new StreamSource(inputStream);
+            SAXResult result = new SAXResult(fopFactory.newFop(MimeConstants.MIME_PDF, foUserAgent, outputStream).getDefaultHandler());
 
-            try (PDPageContentStream contentStream = new PDPageContentStream(pdfDocument, page)) {
-                contentStream.setFont(PDType1Font.HELVETICA, 12);
-                contentStream.beginText();
-                contentStream.setLeading(14.5f);
-                contentStream.newLineAtOffset(25, 700);
-
-                // Write HTML content to PDF
-                contentStream.showText(htmlContent);
-                contentStream.newLine();
-
-                contentStream.endText();
-            }
-
-            // Save PDF document
-            pdfDocument.save(outputStream);
-        } catch (IOException e) {
+            // Perform transformation
+            transformer.transform(source, result);
+        } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    private static String renderHtmlContent(Map<String, Object> data) {
-        ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
-        templateResolver.setTemplateMode("HTML");
-        templateResolver.setSuffix(".html");
-
-        TemplateEngine templateEngine = new TemplateEngine();
-        templateEngine.setTemplateResolver(templateResolver);
-
-        Context context = new Context();
-        context.setVariables(data);
-
-        return templateEngine.process("templates/your-template", context);
     }
 }
