@@ -12,7 +12,9 @@
             </fo:layout-master-set>
             <fo:page-sequence master-reference="simple">
                 <fo:flow flow-name="xsl-region-body">
-                    <xsl:apply-templates/>
+                    <fo:block>
+                        <xsl:apply-templates/>
+                    </fo:block>
                 </fo:flow>
             </fo:page-sequence>
         </fo:root>
@@ -36,6 +38,27 @@
         <fo:block font-family="serif" font-size="18pt" font-weight="bold" space-after="10pt">
             <xsl:apply-templates/>
         </fo:block>
+    </xsl:template>
+
+    <!-- Template for tables -->
+    <xsl:template match="table">
+        <fo:table table-layout="fixed" width="100%" border="1pt solid black">
+            <xsl:apply-templates/>
+        </fo:table>
+    </xsl:template>
+
+    <xsl:template match="tr">
+        <fo:table-row>
+            <xsl:apply-templates/>
+        </fo:table-row>
+    </xsl:template>
+
+    <xsl:template match="td">
+        <fo:table-cell border="1pt solid black" padding="2pt">
+            <fo:block>
+                <xsl:apply-templates/>
+            </fo:block>
+        </fo:table-cell>
     </xsl:template>
 
     <!-- Add more templates for other HTML elements as needed -->
