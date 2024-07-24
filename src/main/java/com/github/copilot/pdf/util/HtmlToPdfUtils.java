@@ -12,27 +12,50 @@ import com.lowagie.text.pdf.PdfWriter;
 import com.lowagie.text.html.simpleparser.HTMLWorker;
 
 import java.io.*;
+import com.lowagie.text.Document;
+import com.lowagie.text.DocumentException;
+import com.lowagie.text.pdf.PdfWriter;
+import org.xhtmlrenderer.pdf.ITextRenderer;
 
+import java.io.*;
 @Slf4j
 public class HtmlToPdfUtils {
 
-;
 
-//        HtmlToPdfUtils.convertToPdf(inputStream, outputStream);
 
-    public static void convertToPdf(InputStream inputStream, OutputStream outputStream) {
-        Document document = new Document();
-        try {
-            PdfWriter.getInstance(document, outputStream);
-            document.open();
-            HTMLWorker htmlWorker = new HTMLWorker(document);
-            htmlWorker.parse(new InputStreamReader(readInputStrem(inputStream)));
-        } catch (DocumentException | IOException e) {
-            e.printStackTrace();
-        } finally {
-            document.close();
+
+        public static void convertToPdf(InputStream inputStream, OutputStream outputStream) {
+            try {
+                // 读取 HTML 内容
+                String htmlContent = readHtmlContent(inputStream);
+
+                // 创建 PDF 文档
+                Document document = new Document();
+                PdfWriter writer = PdfWriter.getInstance(document, outputStream);
+                document.open();
+
+                // 使用 Flying Saucer 解析 HTML 并生成 PDF
+                ITextRenderer renderer = new ITextRenderer();
+                renderer.setDocumentFromString(htmlContent);
+                renderer.layout();
+                renderer.createPDF(outputStream);
+
+                document.close();
+            } catch (DocumentException | IOException e) {
+                e.printStackTrace();
+            }
         }
-    }
+
+        private static String readHtmlContent(InputStream inputStream) throws IOException {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+            StringBuilder content = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                content.append(line);
+            }
+            return content.toString();
+        }
+
 
 
     /**
