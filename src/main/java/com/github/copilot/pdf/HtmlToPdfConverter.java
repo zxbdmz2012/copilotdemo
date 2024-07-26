@@ -13,15 +13,15 @@ public class HtmlToPdfConverter {
     // Template path
     public final static String TEMP = "";
 
-    public static String convertHtmlToPdf(Map<String, Object> content, String htmlFile, String pdfFile, String cssContent) throws IOException {
+    public static String convertHtmlToPdf(Map<String, Object> content,String templateFileName, String htmlFile, String pdfFile ) throws IOException {
         long startTime = System.currentTimeMillis();
 
         // Generate HTML file from template with specified data
         FreeMarkerUtils.genteratorFile(content,
                 TEMP,
-                "ProcurementContractTemplate",
+                templateFileName,
                 TEMP,
-                "afterGeneration.html");
+                htmlFile);
         // Read the HTML file to be converted
         File tempHtmlFile = new File(TEMP + htmlFile);
         InputStream inputStream = new FileInputStream(tempHtmlFile);

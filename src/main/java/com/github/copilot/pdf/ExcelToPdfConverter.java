@@ -17,7 +17,7 @@ public class ExcelToPdfConverter {
             String htmlContent = ExcelToHtmlUtils.convertToHtml(excelInputStream);
 
             // Convert HTML to PDF
-            OpenHtmlToPdfUtils.convertToPdf(new ByteArrayInputStream(htmlContent.getBytes()), pdfOutputStream);
+            OpenHtmlToPdfUtils.convertToPdfWithCss(new ByteArrayInputStream(htmlContent.getBytes()), pdfOutputStream);
 
             log.info("Excel file converted to PDF successfully.");
         } catch (Exception e) {
