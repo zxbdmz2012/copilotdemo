@@ -122,7 +122,7 @@ public class RecoverExecutor {
      * @return
      */
     private String chooseNodeId(List<Node> nodes, String maxNodeId, String nodeId) {
-        if(nodes.isEmpty() || getNodeIdHashCode(nodeId)>= getNodeIdHashCode(maxNodeId)){
+        if(nodeId ==null||nodes.isEmpty() || getNodeIdHashCode(nodeId)>= getNodeIdHashCode(maxNodeId)){
             return nodes.get(0).getNodeId();
         }
         return nodes.stream().filter(node -> getNodeIdHashCode(node.getNodeId()) > getNodeIdHashCode(nodeId)).findFirst().get().getNodeId();

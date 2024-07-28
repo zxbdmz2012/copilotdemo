@@ -4,57 +4,52 @@ import com.github.copilot.task.model.CronModel;
 import com.github.copilot.util.ArrayUtil;
 import java.util.*;
 
-
 public class CronUtil {
 
-
-
-
-
+    // Create a cron expression based on the given CronModel
     public static String createCronExpression(CronModel cronModel) {
         StringBuilder cronExp = new StringBuilder();
 
-        if(Objects.nonNull(cronModel.getRateInt())&&Objects.nonNull(cronModel.getCycleInt())){
-            return createLoopCronExpression(cronModel.getRateInt(),cronModel.getCycleInt());
+        // If rate and cycle are not null, create a loop cron expression
+        if (Objects.nonNull(cronModel.getRateInt()) && Objects.nonNull(cronModel.getCycleInt())) {
+            return createLoopCronExpression(cronModel.getRateInt(), cronModel.getCycleInt());
         }
         if (null == cronModel.getJobType()) {
-            System.out.println("执行周期未配置");//执行周期未配置
+            System.out.println("Execution cycle not configured");
         }
 
+        // If second, minute, and hour are not null, build the cron expression
         if (null != cronModel.getSecond()
                 && null != cronModel.getMinute()
                 && null != cronModel.getHour()) {
-            //秒
+            // Append seconds
             cronExp.append(cronModel.getSecond()).append(" ");
-            //分
+            // Append minutes
             cronExp.append(cronModel.getMinute()).append(" ");
-            //小时
+            // Append hours
             cronExp.append(cronModel.getHour()).append(" ");
-            //每天
+            // Daily job type
             if (cronModel.getJobType().getValue() == 1) {
-                //12 12 12 1/2 * ? *
-                //12 12 12 * * ?
+                // If beApart is not null, append day and month
                 if (cronModel.getBeApart() != null) {
-                    cronExp.append("1");//日
+                    cronExp.append("1");
                     cronExp.append("/");
-                    cronExp.append(cronModel.getBeApart() + 1);//月
+                    cronExp.append(cronModel.getBeApart() + 1);
                     cronExp.append(" ");
                     cronExp.append("* ");
                     cronExp.append("?");
                 } else {
-                    cronExp.append("* ");//日
-                    cronExp.append("* ");//月
-                    cronExp.append("?");//周
+                    // Append day, month, and week
+                    cronExp.append("* ");
+                    cronExp.append("* ");
+                    cronExp.append("?");
                 }
             }
-
-            //按每周
+            // Weekly job type
             else if (cronModel.getJobType().getValue() == 3) {
-                //一个月中第几天
+                // Append week
                 cronExp.append("? ");
-                //月份
                 cronExp.append("* ");
-                //周
                 Integer[] weeks = cronModel.getDayOfWeeks();
                 for (int i = 0; i < weeks.length; i++) {
                     if (i == 0) {
@@ -63,18 +58,19 @@ public class CronUtil {
                         cronExp.append(",").append(weeks[i]);
                     }
                 }
-
             }
-            //按每月
+            // Monthly job type
             else if (cronModel.getJobType().getValue() == 2) {
-                //一个月中的哪几天
+                // Append days of the month
                 Integer[] days = cronModel.getDayOfMonths();
+                if(Objects.isNull(days)) {
+                    return "0 0 0 L * ?";
+                }
                 for (int i = 0; i < days.length; i++) {
                     if (i == 0) {
                         if (days[i] == 32) {
-                            //本月最后一天
-                            String endMouthCron = "0 0 0 L * ?";
-                            return endMouthCron;
+                            // Last day of the month
+                            return "0 0 0 L * ?";
                         } else {
                             cronExp.append(days[i]);
                         }
@@ -82,14 +78,13 @@ public class CronUtil {
                         cronExp.append(",").append(days[i]);
                     }
                 }
-                //月份
+                // Append month and week
                 cronExp.append(" * ");
-                //周
                 cronExp.append("?");
             }
-            //按每年
+            // Yearly job type
             else if (cronModel.getJobType().getValue() == 4) {
-                //一个年中的哪几天
+                // Append days of the year
                 Integer[] days = cronModel.getDayOfMonths();
                 if (ArrayUtil.isEmpty(days)) {
                     cronExp.append("*");
@@ -102,7 +97,7 @@ public class CronUtil {
                         }
                     }
                 }
-                //月份
+                // Append months
                 Integer[] months = cronModel.getMonths();
                 if (ArrayUtil.isEmpty(months)) {
                     cronExp.append(" *");
@@ -110,7 +105,7 @@ public class CronUtil {
                     for (int i = 0; i < months.length; i++) {
                         Integer month = months[i];
                         if (month > 12) {
-                            throw new RuntimeException("月份数据异常: " + Arrays.toString(months));
+                            throw new RuntimeException("Month data exception: " + Arrays.toString(months));
                         }
                         if (i == 0) {
                             cronExp.append(" ").append(month);
@@ -121,117 +116,41 @@ public class CronUtil {
                 }
                 cronExp.append(" ?");
             } else if (cronModel.getJobType().getValue() == 0) {
-                cronExp.append("* ");//日
-                cronExp.append("* ");//月
-                cronExp.append("?");//周
+                // Append day, month, and week
+                cronExp.append("* ");
+                cronExp.append("* ");
+                cronExp.append("?");
             }
         }
         return cronExp.toString();
     }
 
-    /**
-     * 生成计划的详细描述
-     *
-     * @param cronModel
-     * @return String
-     */
-    public static String createDescription(CronModel cronModel) {
-        StringBuffer description = new StringBuffer();
-        //计划执行开始时间
-//      Date startTime = cronModel.getScheduleStartTime();
-
-        if (null != cronModel.getSecond()
-                && null != cronModel.getMinute()
-                && null != cronModel.getHour()) {
-            //按每天
-            if (cronModel.getJobType().getValue() == 1) {
-                Integer beApart = cronModel.getBeApart();
-                if (beApart != null) {
-                    description.append("每间隔").append(beApart).append("天");
-                } else {
-                    description.append("每天");
-                }
-                description.append(cronModel.getHour()).append("时");
-                description.append(cronModel.getMinute()).append("分");
-                description.append(cronModel.getSecond()).append("秒");
-                description.append("执行");
-            }
-
-            //按每周
-            else if (cronModel.getJobType().getValue() == 3) {
-                if (cronModel.getDayOfWeeks() != null && cronModel.getDayOfWeeks().length > 0) {
-                    String days = "";
-                    for (int i : cronModel.getDayOfWeeks()) {
-                        days += "周" + i;
-                    }
-                    description.append("每周的").append(days).append(" ");
-                }
-                if (null != cronModel.getSecond()
-                        && null != cronModel.getMinute()
-                        && null != cronModel.getHour()) {
-                    description.append(",");
-                    description.append(cronModel.getHour()).append("时");
-                    description.append(cronModel.getMinute()).append("分");
-                    description.append(cronModel.getSecond()).append("秒");
-                }
-                description.append("执行");
-            }
-
-            //按每月
-            else if (cronModel.getJobType().getValue() == 2) {
-                //选择月份
-                if (cronModel.getDayOfMonths() != null && cronModel.getDayOfMonths().length > 0) {
-                    String days = "";
-                    for (int i : cronModel.getDayOfMonths()) {
-                        days += i + "号";
-                    }
-                    description.append("每月的").append(days).append(" ");
-                }
-                description.append(cronModel.getHour()).append("时");
-                description.append(cronModel.getMinute()).append("分");
-                description.append(cronModel.getSecond()).append("秒");
-                description.append("执行");
-            }
-
-        }
-        return description.toString();
-    }
-
-
-    /**
-     * 构建Cron表达式
-     *
-     * @param rate  第几位
-     * @param cycle 数值
-     * @return
-     */
+    // Build a loop cron expression based on rate and cycle
     public static String createLoopCronExpression(int rate, int cycle) {
         String cron = "";
         switch (rate) {
-            case 0:// 每cycle秒执行一次
+            case 0: // Execute every cycle seconds
                 cron = "0/" + cycle + " * * * * ?";
                 break;
-            case 1:// 每cycle分钟执行一次
+            case 1: // Execute every cycle minutes
                 cron = "0 0/" + cycle + " * * * ?";
                 break;
-            case 2:// 每cycle小时执行一次
+            case 2: // Execute every cycle hours
                 cron = "0 0 0/" + cycle + " * * ?";
                 break;
-            case 3:// 每cycle天的0点执行一次
+            case 3: // Execute every cycle days at 0:00
                 cron = "0 0 0 1/" + cycle + " * ?";
                 break;
-            case 4:// 每cycle月的1号0点执行一次
+            case 4: // Execute every cycle months on the 1st at 0:00
                 cron = "0 0 0 1 1/" + cycle + " ? ";
                 break;
-            case 5://  每天cycle点执行一次
+            case 5: // Execute every day at cycle hour
                 cron = "0 0 " + cycle + "  * * ?";
                 break;
-            default:// 默认每cycle秒执行一次
+            default: // Default to execute every cycle seconds
                 cron = "0/1 * * * * ?";
                 break;
         }
         return cron;
     }
-
-
 }

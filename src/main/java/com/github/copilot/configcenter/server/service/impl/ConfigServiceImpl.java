@@ -16,6 +16,7 @@ import com.github.copilot.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.AsyncContext;
@@ -156,22 +157,29 @@ public class ConfigServiceImpl implements ConfigService {
         }
     }
 
-    // Handles configuration change events
+    @Scheduled(fixedRate = 5000) // Run every 5 seconds
+    public void processConfigChangeEvents() {
+        List<ConfigDO> updatedConfigs = configDAO.getUpdatedConfigs();
+        for (ConfigDO configDO : updatedConfigs) {
+            long configId = configDO.getId();
+            // Process the configuration change event
+            List<ConfigPolingTask> todoTasks = configPolingTasksHolder.getExecuteTaskList(
+                    configPolingTask -> configPolingTask.getConfigPolingDataMap().containsKey(configId));
+
+            if (!todoTasks.isEmpty()) {
+                List<ConfigBO> configList = Collections.singletonList(ConfigDO2BO(configDO));
+                todoTasks.forEach(todoTask -> {
+                    List<ConfigVO> changeConfigList = getChangeConfigList(todoTask, configList);
+                    respExecutor.submit(() -> doResponseTask(todoTask, Result.success(changeConfigList)));
+                });
+            }
+        }
+    }
+
+            // Handles configuration change events
     @Override
     public void onChangeConfigEvent(long configId) {
-        // Retrieve tasks affected by the configuration change
-        List<ConfigPolingTask> todoTasks = configPolingTasksHolder.getExecuteTaskList(
-                configPolingTask -> configPolingTask.getConfigPolingDataMap().containsKey(configId));
-
-        if (!todoTasks.isEmpty()) {
-            // Retrieve the updated configuration
-            List<ConfigBO> configList = Collections.singletonList(ConfigDO2BO(configDAO.getConfig(configId)));
-            // Respond to each affected polling task
-            todoTasks.forEach(todoTask -> {
-                List<ConfigVO> changeConfigList = getChangeConfigList(todoTask, configList);
-                respExecutor.submit(() -> doResponseTask(todoTask, Result.success(changeConfigList)));
-            });
-        }
+//        configDAO.updateConfigTime(configId);
     }
 
     // Determines if there are any changes to configurations relevant to a polling task

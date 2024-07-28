@@ -7,6 +7,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
@@ -96,7 +97,7 @@ public class EasyJobConfig implements InitializingBean {
             return InetAddress.getLocalHost().getHostAddress();
         } catch (UnknownHostException e) {
             // Log the error or return a default value
-            System.err.println("Unable to get local IP address: " + e.getMessage());
+            log.error("Unable to get local IP address: " + e.getMessage());
             return "unknown";
         }
     }
@@ -105,6 +106,23 @@ public class EasyJobConfig implements InitializingBean {
      * The system start time, used for monitoring and possibly for recovery mechanisms.
      */
     private Date sysStartTime;
+
+    public Date getSystStartTime() {
+        if (sysStartTime == null) {
+            sysStartTime = new Date();
+        }
+        return sysStartTime;
+    }
+
+    @PostConstruct
+    public void init() {
+        log.info("EasyJob configuration initialized");
+        sysStartTime = new Date();
+        log.info("System start time: {}", sysStartTime);
+        log.info("Node ID: {}", nodeId);
+
+    }
+
 
     @Override
     public void afterPropertiesSet() throws Exception {

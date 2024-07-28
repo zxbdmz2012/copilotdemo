@@ -26,6 +26,14 @@ public class DateUtil {
         return localDateTime.format(formatter);
     }
 
+    public static String date2str(Date date) {
+        if (date == null) {
+            return null; // Or return a default value like "N/A"
+        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return formatter.format(date.toInstant());
+    }
+
     /**
      * Formats a Date object into a string representation.
      *

@@ -28,7 +28,7 @@ public class ExceptionInfo extends BaseEntity {
             allocationSize = 1)
     private Long id;
 
-    @Length(max = 255)
+    @Length(max = 1024)
     private String message;
 
     @Lob
@@ -38,10 +38,17 @@ public class ExceptionInfo extends BaseEntity {
 
     private String time;
 
+    public void setMessage(String message){
+        if(message!=null && message.length()>1024) {
+            this.message = message.substring(0, 1024);
+        }else {
+            this.message = message;
+        }
+    }
     public ExceptionInfo(LocalDateTime localDateTime, Class errorType, Throwable throwable) {
         this.time = DateUtil.date2str(localDateTime);
         this.simpleName = errorType.getSimpleName();
-        this.message = throwable.getMessage();
+        setMessage(throwable.getMessage());
         StringWriter sw = new StringWriter();
         throwable.printStackTrace(new java.io.PrintWriter(sw));
         StringBuffer sb = sw.getBuffer();

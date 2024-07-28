@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -41,7 +43,7 @@ public class NodeRepository {
     public Node updateHeartBeat(String nodeId) {
         Node node = nodeJpaRepository.findByNodeId(nodeId);
         if (Objects.nonNull(node)) {
-            node.setUpdateTime(LocalDateTime.now());
+            node.setUpdateTime(new Date());
             return nodeJpaRepository.save(node);
         }
         return null;
@@ -123,7 +125,11 @@ public class NodeRepository {
      * @return A list of enabled nodes.
      */
     public List<Node> getEnableNodes(int timeout) {
-        return nodeJpaRepository.findByNodeStatusAndUpdateTimeBefore(NodeStatus.ENABLE, LocalDateTime.now().minusSeconds(timeout));
+        Date currentDate = new Date();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(currentDate);
+        calendar.add(Calendar.SECOND, -timeout);
+        return nodeJpaRepository.findByNodeStatusAndUpdateTimeAfter(NodeStatus.ENABLE,calendar.getTime());
     }
 
     /**

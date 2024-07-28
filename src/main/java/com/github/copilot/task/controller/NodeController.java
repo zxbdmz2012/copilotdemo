@@ -2,6 +2,7 @@ package com.github.copilot.task.controller;
 
 import com.github.copilot.task.entity.Node;
 import com.github.copilot.task.repository.NodeJpaRepository;
+import com.github.copilot.task.repository.NodeRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -19,10 +20,14 @@ import java.util.Optional;
 @RequestMapping("/nodes")
 public class NodeController {
 
-    private final NodeJpaRepository nodeRepository;
+    private final NodeJpaRepository nodeJpaRepository;
+
+    private final NodeRepository nodeRepository;
+
 
     @Autowired
-    public NodeController(NodeJpaRepository nodeRepository) {
+    public NodeController(NodeJpaRepository nodeJpaRepository,NodeRepository nodeRepository) {
+        this.nodeJpaRepository = nodeJpaRepository;
         this.nodeRepository = nodeRepository;
     }
 
@@ -34,7 +39,7 @@ public class NodeController {
     })
     @GetMapping
     public List<Node> getAllNodes() {
-        return nodeRepository.findAll();
+        return nodeJpaRepository.findAll();
     }
 
     @Operation(summary = "Get a node by ID", responses = {
@@ -45,7 +50,7 @@ public class NodeController {
     })
     @GetMapping("/{nodeId}")
     public ResponseEntity<Node> getNodeById(@PathVariable String nodeId) {
-        Optional<Node> node = nodeRepository.findById(nodeId);
+        Optional<Node> node = nodeJpaRepository.findById(nodeId);
         return node.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
@@ -56,8 +61,9 @@ public class NodeController {
     })
     @PostMapping
     public Node createNode(@RequestBody Node node) {
-        return nodeRepository.save(node);
+        return nodeJpaRepository.save(node);
     }
+
 
     @Operation(summary = "Update an existing node", responses = {
             @ApiResponse(description = "Node updated successfully", responseCode = "200",
@@ -67,13 +73,13 @@ public class NodeController {
     })
     @PutMapping("/{nodeId}")
     public ResponseEntity<Node> updateNode(@PathVariable String nodeId, @RequestBody Node nodeDetails) {
-        return nodeRepository.findById(nodeId)
+        return nodeJpaRepository.findById(nodeId)
                 .map(node -> {
                     node.setNodeStatus(nodeDetails.getNodeStatus());
                     node.setWeight(nodeDetails.getWeight());
                     node.setNotifyCmd(nodeDetails.getNotifyCmd());
                     node.setNotifyValue(nodeDetails.getNotifyValue());
-                    Node updatedNode = nodeRepository.save(node);
+                    Node updatedNode = nodeJpaRepository.save(node);
                     return ResponseEntity.ok(updatedNode);
                 }).orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -84,9 +90,9 @@ public class NodeController {
     })
     @DeleteMapping("/{nodeId}")
     public ResponseEntity<?> deleteNode(@PathVariable String nodeId) {
-        return nodeRepository.findById(nodeId)
+        return nodeJpaRepository.findById(nodeId)
                 .map(node -> {
-                    nodeRepository.delete(node);
+                    nodeJpaRepository.delete(node);
                     return ResponseEntity.ok().build();
                 }).orElseGet(() -> ResponseEntity.notFound().build());
     }

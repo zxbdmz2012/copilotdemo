@@ -57,5 +57,5 @@ public interface TaskJpaRepository extends JpaRepository<Task, Long> {
      * @param localDateTime The time before which the tasks were last updated.
      * @return A list of tasks matching the criteria.
      */
-    List<Task> findByStatusInAndUpdateTimeBefore(ArrayList<TaskStatus> taskStatuses, LocalDateTime localDateTime);
+    List<Task> findByStatusInAndUpdateTimeBefore(ArrayList<TaskStatus> taskStatuses, Date date);
 }

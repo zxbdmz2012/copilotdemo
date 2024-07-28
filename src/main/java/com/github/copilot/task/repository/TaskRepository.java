@@ -89,8 +89,14 @@ public class TaskRepository {
         ArrayList<TaskStatus> taskStatuses = new ArrayList<>();
         taskStatuses.add(TaskStatus.DOING);
         taskStatuses.add(TaskStatus.ERROR);
+        taskStatuses.add(TaskStatus.PENDING);
 
-        return taskJpaRepository.findByStatusInAndUpdateTimeBefore(taskStatuses, LocalDateTime.now().minusSeconds(timeout));
+
+        Date currentDateTime = new Date();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(currentDateTime);
+        calendar.add(Calendar.SECOND, -timeout);
+        return taskJpaRepository.findByStatusInAndUpdateTimeBefore(taskStatuses, calendar.getTime());
     }
 
     /**
@@ -269,18 +275,11 @@ public class TaskRepository {
                     return false;
                 }
                 // 更新所有字段
-                latestTask.setName(task.getName());
-                latestTask.setCronExpr(task.getCronExpr());
-                latestTask.setNodeId(task.getNodeId());
                 latestTask.setStatus(task.getStatus());
                 latestTask.setSuccessCount(task.getSuccessCount());
                 latestTask.setFailCount(task.getFailCount());
                 latestTask.setInvokeInfoJson(task.getInvokeInfoJson());
-                latestTask.setVersion(task.getVersion()); // 注意：实际上，版本字段应由JPA自动处理
-                latestTask.setFirstStartTime(task.getFirstStartTime());
                 latestTask.setNextStartTime(task.getNextStartTime());
-                latestTask.setFinalEndTime(task.getFinalEndTime());
-                // 注意：invocation字段是Transient的，不需要持久化
 
                 taskJpaRepository.save(latestTask); // 尝试保存更新
                 return true; // 更新成功

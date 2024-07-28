@@ -11,22 +11,23 @@ import java.util.Map;
 @Slf4j
 public class HtmlToPdfConverter {
     // Template path
-    public final static String TEMP = "";
+    public final static String TEMPLATE_PATH = "templates/";
 
-    public static String convertHtmlToPdf(Map<String, Object> content,String templateFileName, String htmlFile, String pdfFile ) throws IOException {
+    public static String convertHtmlToPdf(Map<String, Object> content,String templateFileName, String outputPath ,String htmlFile, String pdfFile ) throws IOException {
         long startTime = System.currentTimeMillis();
 
         // Generate HTML file from template with specified data
-        FreeMarkerUtils.genteratorFile(content,
-                TEMP,
+        FreeMarkerUtils.genteratorFile(
+                content,
+                TEMPLATE_PATH,
                 templateFileName,
-                TEMP,
+                outputPath,
                 htmlFile);
         // Read the HTML file to be converted
-        File tempHtmlFile = new File(TEMP + htmlFile);
+        File tempHtmlFile = new File(outputPath + htmlFile);
         InputStream inputStream = new FileInputStream(tempHtmlFile);
         // Output stream for the generated PDF file
-        File outputPdfFile = new File(TEMP + pdfFile);
+        File outputPdfFile = new File(outputPath + pdfFile);
         OutputStream outputStream = new FileOutputStream(outputPdfFile);
 
         // Choose conversion method

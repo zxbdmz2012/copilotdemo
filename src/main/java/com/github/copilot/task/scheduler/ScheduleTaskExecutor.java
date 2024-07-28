@@ -198,7 +198,8 @@ public class ScheduleTaskExecutor {
                     /**
                      * 先休息一下
                      */
-                    Thread.sleep(config.getFetchPeriod());
+                    // 10s 100 *100 ms
+                    Thread.sleep(config.getFetchPeriod()*100);
                     /**
                      * 先获取可用的节点列表
                      */
@@ -233,7 +234,7 @@ public class ScheduleTaskExecutor {
                          * 必然会返回0了
                          */
                         Date nextStartTime = task.getNextStartTime();
-                        if (taskRepository.updateTask(task) || nextStartTime == null) {
+                        if (!taskRepository.updateTask(task) || nextStartTime == null) {
                             continue;
                         }
 
@@ -258,7 +259,7 @@ public class ScheduleTaskExecutor {
                         task = taskRepository.get(task.getId());
                         DelayItem<Task> delayItem = new DelayItem<Task>(nextStartTime.getTime() - new Date().getTime(), task);
                         taskQueue.offer(delayItem);
-
+                        logger.info("add task:{} to taskQueue", task.getId());
                     }
 
                 } catch (Exception e) {

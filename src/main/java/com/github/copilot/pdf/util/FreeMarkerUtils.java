@@ -44,8 +44,12 @@ public class FreeMarkerUtils
      */
     public static void genteratorFile(Map<String, Object> input, String template_path, String templateFileName, String savePath, String fileName)
     {
+        try{
+
+        Configuration configuration = new Configuration(Configuration.VERSION_2_3_0);
+        configuration.setClassForTemplateLoading(FreeMarkerUtils.class, "/");
         // Get the template
-        Template template = getTemplate(template_path, templateFileName);
+        Template template = configuration.getTemplate(template_path + templateFileName + ".ftl");
         // Create the save directory if it does not exist
         File filePath = new File(savePath);
         if (!filePath.exists()) {
@@ -59,7 +63,6 @@ public class FreeMarkerUtils
             file.delete();
         }
         Writer writer = null;
-        try {
             // Create a writer with UTF-8 encoding
             writer = new OutputStreamWriter(new FileOutputStream(filename), "UTF-8");
             // Process the template with the input data

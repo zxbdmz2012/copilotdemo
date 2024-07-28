@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -13,5 +14,5 @@ public interface NodeJpaRepository extends JpaRepository<Node, String> {
 
     Node findByNodeId(String nodeId);
 
-    List<Node> findByNodeStatusAndUpdateTimeBefore(NodeStatus nodeStatus, LocalDateTime localDateTime);
+    List<Node> findByNodeStatusAndUpdateTimeAfter(NodeStatus nodeStatus, Date date);
 }

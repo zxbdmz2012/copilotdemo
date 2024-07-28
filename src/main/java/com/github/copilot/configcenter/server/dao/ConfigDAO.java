@@ -7,6 +7,8 @@ import java.util.List;
  * Interface for data access operations related to {@link ConfigDO} entities.
  */
 public interface ConfigDAO {
+    List<ConfigDO> getUpdatedConfigs();
+
     /**
      * Inserts a new {@link ConfigDO} into the database.
      *

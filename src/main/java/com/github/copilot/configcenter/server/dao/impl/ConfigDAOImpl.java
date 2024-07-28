@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +19,14 @@ public class ConfigDAOImpl implements ConfigDAO {
 
     @Autowired
     private ConfigRepository configRepository;
+
+    @Override
+    public List<ConfigDO> getUpdatedConfigs() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.SECOND, -5);
+        Date fiveSecondsAgo = calendar.getTime();
+        return configRepository.findByUpdateTimeAfter(fiveSecondsAgo);
+    }
 
     @Override
     public long insertConfigDO(ConfigDO configDO) {

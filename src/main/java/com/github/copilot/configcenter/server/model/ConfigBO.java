@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * Business Object class for configuration data.
@@ -41,5 +42,5 @@ public class ConfigBO {
      * Timestamp indicating when the configuration was created.
      * Helps in tracking the age of the configuration and potentially in audit processes.
      */
-    private LocalDateTime createTime;
+    private Date createTime;
 }
