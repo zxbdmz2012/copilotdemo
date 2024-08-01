@@ -45,9 +45,6 @@ public class ConfigServiceImpl implements ConfigService {
     // Service for synchronizing configuration updates
     @Autowired
     private ConfigSyncService configSyncService;
-    // Implementation of the configuration synchronization service
-    @Autowired
-    private ConfigSyncServiceImpl syncService;
     // Number of threads for the response executor
     private int respThreadNum;
 
@@ -176,7 +173,7 @@ public class ConfigServiceImpl implements ConfigService {
         }
     }
 
-            // Handles configuration change events
+    // Handles configuration change events
     @Override
     public void onChangeConfigEvent(long configId) {
 //        configDAO.updateConfigTime(configId);
