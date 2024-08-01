@@ -28,7 +28,7 @@ public class ExceptionInfo extends BaseEntity {
             allocationSize = 1)
     private Long id;
 
-    @Length(max = 1024)
+    @Length(max = 255)
     private String message;
 
     @Lob
@@ -39,8 +39,8 @@ public class ExceptionInfo extends BaseEntity {
     private String time;
 
     public void setMessage(String message){
-        if(message!=null && message.length()>1024) {
-            this.message = message.substring(0, 1024);
+        if(message!=null && message.length()>255) {
+            this.message = message.substring(0, 255);
         }else {
             this.message = message;
         }
